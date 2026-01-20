@@ -1,20 +1,13 @@
-// --- 1. DATA CONFIGURATION ---
-// Titles match the IDs. You must create "stories/{id}_{tone}_{length}.txt" files.
-const baseStories = [
-    { id: 1, title: "The Last Watchmaker" },
-    { id: 2, title: "Ocean of Stars" },
-    { id: 3, title: "The Coffee Shop" },
-    { id: 4, title: "Digital Ghost" },
-    { id: 5, title: "The Whispering Forest" },
-    { id: 6, title: "Gravity Racing" },
-    { id: 7, title: "The Painter of Dreams" },
-    { id: 8, title: "Binary Love" },
-    { id: 9, title: "The Library of Lost Things" },
-    { id: 10, title: "Silence on Mars" }
+// --- 1. FILE CONFIGURATION ---
+// List of files to scan. In a static environment, we must define these manually.
+// Ensure these files exist in your 'stories/' folder.
+const storyFiles = [
+    'stories/the_last_watchmaker.txt'
 ];
 
 // --- STATE ---
-let currentStoryId = 1;
+let library = []; // Will hold parsed story objects
+let currentStory = null;
 let currentTone = 'happy';
 let currentLength = 'short';
 
@@ -41,19 +34,15 @@ const els = {
     
     // Home Inputs
     select: document.getElementById('storySelect'),
+    toneSelector: document.getElementById('toneSelector'),
+    lengthSelector: document.getElementById('lengthSelector'),
     toneBtns: document.querySelectorAll('#toneSelector .option-btn'),
     lengthBtns: document.querySelectorAll('#lengthSelector .option-btn'),
     staticSummary: document.getElementById('staticSummary'),
     wordCount: document.getElementById('wordCountDisplay'),
     btnStart: document.getElementById('btnStartReading'),
     
-    // Settings / Nav
-    btnOpenSettings: document.getElementById('btnOpenSettings'),
-    btnCloseSettingsX: document.getElementById('btnCloseSettingsX'),
-    btnSaveSettings: document.getElementById('btnSaveSettings'),
-    btnResetSettings: document.getElementById('btnResetSettings'),
-
-    // Reader
+    // Reader & Settings Elements
     left: document.getElementById('txtLeft'),
     pivot: document.getElementById('txtPivot'),
     right: document.getElementById('txtRight'),
@@ -65,82 +54,141 @@ const els = {
     btnSlower: document.getElementById('btnSlower'),
     btnClose: document.getElementById('btnCloseReader'),
     btnSound: document.getElementById('btnSoundToggle'),
-    
-    // Settings Inputs
+    btnOpenSettings: document.getElementById('btnOpenSettings'),
+    btnCloseSettingsX: document.getElementById('btnCloseSettingsX'),
+    btnSaveSettings: document.getElementById('btnSaveSettings'),
+    btnResetSettings: document.getElementById('btnResetSettings'),
     setFontFamily: document.getElementById('setFontFamily'),
     setFontSize: document.getElementById('setFontSize'),
     fontSizeDisplay: document.getElementById('fontSizeDisplay'),
     soundSelects: document.querySelectorAll('.sound-select'),
-    
-    // Preview
     pLeft: document.getElementById('pLeft'),
     pPivot: document.getElementById('pPivot'),
     pRight: document.getElementById('pRight'),
-    readerDisplay: document.getElementById('readerDisplay'),
     previewDisplay: document.getElementById('previewDisplay')
 };
 
 // --- INITIALIZATION ---
-function init() {
-    populateSelect();
-    
-    // Event Listeners
-    els.select.addEventListener('change', (e) => {
-        currentStoryId = parseInt(e.target.value);
-        refreshHomeData();
-    });
+async function init() {
+    // 1. Load and Parse Library
+    await buildLibrary();
 
-    // Tone Selection
-    els.toneBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            els.toneBtns.forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            currentTone = btn.dataset.val;
-            refreshHomeData();
-        });
-    });
+    // 2. Setup Event Listeners
+    setupEventListeners();
 
-    // Length Selection
-    els.lengthBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            els.lengthBtns.forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            currentLength = btn.dataset.val;
-            refreshHomeData();
-        });
-    });
-
-    // Navigation
-    els.btnStart.addEventListener('click', openReader);
-    els.btnClose.addEventListener('click', closeReader);
-    els.btnOpenSettings.addEventListener('click', openSettings);
-    els.btnCloseSettingsX.addEventListener('click', closeSettingsNoSave);
-    els.btnSaveSettings.addEventListener('click', saveSettings);
-    els.btnResetSettings.addEventListener('click', resetSettings);
-
-    // Reader Controls
-    els.btnPlay.addEventListener('click', togglePlay);
-    els.btnReset.addEventListener('click', resetReader);
-    els.btnSound.addEventListener('click', toggleSound);
-    els.btnFaster.addEventListener('click', () => changeSpeed(25));
-    els.btnSlower.addEventListener('click', () => changeSpeed(-25));
-
-    // Settings Live Updates
-    els.setFontFamily.addEventListener('change', updatePreviewState);
-    els.setFontSize.addEventListener('input', (e) => {
-        els.fontSizeDisplay.textContent = e.target.value + "rem";
-        updatePreviewState();
-    });
-    els.soundSelects.forEach(s => s.addEventListener('change', updateSoundState));
-
-    // Initial Load
-    els.select.value = "1";
-    refreshHomeData();
+    // 3. Select first story if available
+    if (library.length > 0) {
+        els.select.value = library[0].id;
+        loadSelectedStory(library[0].id);
+    }
 }
 
-function populateSelect() {
+// --- LIBRARY LOGIC ---
+
+async function buildLibrary() {
+    els.select.innerHTML = '<option disabled>Scanning stories...</option>';
+    
+    const parsedStories = [];
+
+    // Fetch all files in parallel
+    const promises = storyFiles.map(filename => fetch(filename).then(res => {
+        if (!res.ok) throw new Error(`Failed to load ${filename}`);
+        return res.text();
+    }).then(text => parseStoryFile(text, filename))
+      .catch(err => console.error(err))
+    );
+
+    const results = await Promise.all(promises);
+    
+    // Filter valid results
+    results.forEach(story => {
+        if (story) parsedStories.push(story);
+    });
+
+    // Sort Alphabetically
+    parsedStories.sort((a, b) => a.title.localeCompare(b.title));
+    
+    library = parsedStories;
+    populateSelectDropdown();
+}
+
+function parseStoryFile(text, filename) {
+    // Parsing Logic
+    const lines = text.split('\n');
+    let story = {
+        id: filename, 
+        title: "Unknown Title",
+        variants: {} // Structure: { 'happy': { 'short': "text...", 'long': "text..." } }
+    };
+
+    let readingMetadata = false;
+    let currentVariant = null;
+    let currentLength = null;
+    let buffer = [];
+
+    for (let line of lines) {
+        const trimmed = line.trim();
+
+        if (trimmed === 'METADATA') {
+            readingMetadata = true;
+            continue;
+        }
+        if (trimmed === 'END_METADATA') {
+            readingMetadata = false;
+            continue;
+        }
+
+        if (readingMetadata) {
+            if (trimmed.startsWith('Title:')) story.title = trimmed.replace('Title:', '').trim();
+            continue;
+        }
+
+        // Section Detection: === VARIANT: happy | LENGTH: short ===
+        if (trimmed.startsWith('===') && trimmed.endsWith('===')) {
+            // Save previous buffer
+            if (currentVariant && currentLength && buffer.length > 0) {
+                if (!story.variants[currentVariant]) story.variants[currentVariant] = {};
+                story.variants[currentVariant][currentLength] = buffer.join('\n').trim();
+            }
+
+            // Parse new section header
+            const content = trimmed.replace(/===/g, '').trim();
+            // content example: "VARIANT: happy | LENGTH: short"
+            const parts = content.split('|');
+            currentVariant = null;
+            currentLength = null;
+
+            parts.forEach(part => {
+                const [key, val] = part.split(':').map(s => s.trim().toLowerCase());
+                if (key === 'variant') currentVariant = val;
+                if (key === 'length') currentLength = val;
+            });
+
+            buffer = []; // Reset buffer
+        } else {
+            if (currentVariant && currentLength) {
+                buffer.push(line);
+            }
+        }
+    }
+
+    // Save last buffer
+    if (currentVariant && currentLength && buffer.length > 0) {
+        if (!story.variants[currentVariant]) story.variants[currentVariant] = {};
+        story.variants[currentVariant][currentLength] = buffer.join('\n').trim();
+    }
+
+    return story;
+}
+
+function populateSelectDropdown() {
     els.select.innerHTML = '';
-    baseStories.forEach(s => {
+    if (library.length === 0) {
+        els.select.innerHTML = '<option disabled>No stories found</option>';
+        return;
+    }
+
+    library.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s.id;
         opt.textContent = s.title;
@@ -148,51 +196,139 @@ function populateSelect() {
     });
 }
 
-// --- FETCHING DATA ---
-async function refreshHomeData() {
-    const story = baseStories.find(s => s.id === currentStoryId);
-    if(!story) return;
+// --- UI UPDATE LOGIC ---
 
-    // Reset UI while loading
-    els.wordCount.textContent = "Loading...";
-    els.staticSummary.textContent = "Fetching story content...";
-    els.btnStart.disabled = true;
+function loadSelectedStory(id) {
+    currentStory = library.find(s => s.id === id);
+    if (!currentStory) return;
 
-    // Construct filename: stories/1_happy_short.txt
-    const filename = `stories/${currentStoryId}_${currentTone}_${currentLength}.txt`;
+    // 1. Check Availability and Update Buttons
+    updateAvailabilityUI();
 
-    try {
-        const response = await fetch(filename);
-        
-        if (!response.ok) {
-            throw new Error(`File not found: ${filename}`);
-        }
-
-        const fullText = await response.text();
-        
-        // Update State
-        wordQueue = fullText.split(/\s+/).filter(w => w.length > 0);
-        
-        // Update UI
-        els.wordCount.textContent = `Words: ${wordQueue.length}`;
-        els.staticSummary.textContent = `Summary: A ${currentTone} version of "${story.title}" (${currentLength} length). Ready to read!`;
-        els.btnStart.disabled = false;
-
-    } catch (error) {
-        console.error(error);
-        els.staticSummary.textContent = `Error: Could not load "${filename}". Please ensure the .txt file exists in the 'stories' folder.`;
-        els.wordCount.textContent = "Error";
-        wordQueue = []; // Clear queue on error
-    }
+    // 2. Load Content
+    refreshContent();
 }
 
+function updateAvailabilityUI() {
+    if (!currentStory) return;
 
-// --- NAVIGATION ---
-function openReader() {
-    if (wordQueue.length === 0) {
-        alert("No story content loaded. Please check if the file exists.");
+    // Check Tones
+    els.toneBtns.forEach(btn => {
+        const val = btn.dataset.val;
+        const exists = currentStory.variants.hasOwnProperty(val);
+        btn.disabled = !exists;
+        btn.style.opacity = exists ? '1' : '0.3';
+        
+        // If current selection is invalid, switch to first available
+        if (currentTone === val && !exists) {
+            const firstValid = Object.keys(currentStory.variants)[0];
+            if (firstValid) {
+                currentTone = firstValid;
+                updateSelectionClasses(els.toneBtns, currentTone);
+            }
+        }
+    });
+
+    // Check Lengths for the *Current Tone*
+    const availableLengths = currentStory.variants[currentTone] || {};
+    
+    els.lengthBtns.forEach(btn => {
+        const val = btn.dataset.val;
+        const exists = availableLengths.hasOwnProperty(val);
+        btn.disabled = !exists;
+        btn.style.opacity = exists ? '1' : '0.3';
+
+        // Switch if current length invalid
+        if (currentLength === val && !exists) {
+            const firstValid = Object.keys(availableLengths)[0];
+            if (firstValid) {
+                currentLength = firstValid;
+                updateSelectionClasses(els.lengthBtns, currentLength);
+            }
+        }
+    });
+}
+
+function updateSelectionClasses(nodeList, activeVal) {
+    nodeList.forEach(btn => {
+        if (btn.dataset.val === activeVal) btn.classList.add('selected');
+        else btn.classList.remove('selected');
+    });
+}
+
+function refreshContent() {
+    if (!currentStory || !currentStory.variants[currentTone] || !currentStory.variants[currentTone][currentLength]) {
+        els.wordCount.textContent = "Unavailable";
+        els.staticSummary.textContent = "This combination is not available.";
+        els.btnStart.disabled = true;
+        wordQueue = [];
         return;
     }
+
+    const text = currentStory.variants[currentTone][currentLength];
+    
+    // Parse words
+    wordQueue = text.split(/\s+/).filter(w => w.length > 0);
+    
+    // Update Stats
+    els.wordCount.textContent = `Words: ${wordQueue.length}`;
+    els.staticSummary.textContent = `Summary: A ${currentTone} version of "${currentStory.title}" (${currentLength} length). Ready to read!`;
+    els.btnStart.disabled = false;
+}
+
+// --- EVENT HANDLERS ---
+
+function setupEventListeners() {
+    // Story Select
+    els.select.addEventListener('change', (e) => {
+        loadSelectedStory(e.target.value);
+    });
+
+    // Tone Buttons
+    els.toneBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.disabled) return;
+            currentTone = btn.dataset.val;
+            updateSelectionClasses(els.toneBtns, currentTone);
+            updateAvailabilityUI(); // Re-check lengths for new tone
+            refreshContent();
+        });
+    });
+
+    // Length Buttons
+    els.lengthBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.disabled) return;
+            currentLength = btn.dataset.val;
+            updateSelectionClasses(els.lengthBtns, currentLength);
+            refreshContent();
+        });
+    });
+
+    // Navigation & Settings
+    els.btnStart.addEventListener('click', openReader);
+    els.btnClose.addEventListener('click', closeReader);
+    els.btnOpenSettings.addEventListener('click', openSettings);
+    els.btnCloseSettingsX.addEventListener('click', closeSettingsNoSave);
+    els.btnSaveSettings.addEventListener('click', saveSettings);
+    els.btnResetSettings.addEventListener('click', resetSettings);
+    els.btnPlay.addEventListener('click', togglePlay);
+    els.btnReset.addEventListener('click', resetReader);
+    els.btnSound.addEventListener('click', toggleSound);
+    els.btnFaster.addEventListener('click', () => changeSpeed(25));
+    els.btnSlower.addEventListener('click', () => changeSpeed(-25));
+    els.setFontFamily.addEventListener('change', updatePreviewState);
+    els.setFontSize.addEventListener('input', (e) => {
+        els.fontSizeDisplay.textContent = e.target.value + "rem";
+        updatePreviewState();
+    });
+    els.soundSelects.forEach(s => s.addEventListener('change', updateSoundState));
+}
+
+// --- READER & AUDIO LOGIC ---
+
+function openReader() {
+    if (wordQueue.length === 0) return;
     currentIndex = 0;
     updateDisplay();
     els.pageHome.classList.add('hidden');
@@ -207,16 +343,13 @@ function closeReader() {
 
 function openSettings() {
     tempSettings = JSON.parse(JSON.stringify(appSettings));
-    
     els.setFontFamily.value = tempSettings.fontFamily;
     els.setFontSize.value = tempSettings.fontSize;
     els.fontSizeDisplay.textContent = tempSettings.fontSize + "rem";
-    
     els.soundSelects.forEach(sel => {
         const punc = sel.dataset.punc;
         sel.value = tempSettings.sounds[punc];
     });
-
     startPreviewLoop();
     els.pageHome.classList.add('hidden');
     els.pageSettings.classList.remove('hidden');
@@ -267,7 +400,6 @@ function updateSoundState(e) {
     tempSettings.sounds[punc] = e.target.value;
 }
 
-// --- PREVIEW LOOP ---
 let previewInterval = null;
 const previewWords = "A quick fox jumped over".split(" ");
 let previewIndex = 0;
@@ -294,15 +426,12 @@ function startPreviewLoop() {
 
 function stopPreviewLoop() { clearInterval(previewInterval); }
 
-
-// --- AUDIO ENGINE ---
 const AudioEngine = (() => {
     let ctx = null;
     function initCtx() {
         if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
         if (ctx.state === 'suspended') ctx.resume();
     }
-
     function playWave(type, freq, duration, slide) {
         if (!ctx) initCtx();
         const osc = ctx.createOscillator();
@@ -322,7 +451,6 @@ const AudioEngine = (() => {
         osc.start();
         osc.stop(ctx.currentTime + duration);
     }
-
     function playNoise(duration) {
         if (!ctx) initCtx();
         const bSize = ctx.sampleRate * duration;
@@ -338,7 +466,6 @@ const AudioEngine = (() => {
         gain.connect(ctx.destination);
         noise.start();
     }
-
     return {
         trigger: (puncType) => {
             const soundType = appSettings.sounds[puncType]; 
@@ -356,7 +483,6 @@ const AudioEngine = (() => {
     };
 })();
 
-// --- READER LOGIC ---
 function getPivotIndex(cleanWord) {
     const len = cleanWord.length;
     if (len === 1) return 0;
@@ -374,11 +500,9 @@ function renderWord(rawWord) {
         else if (lastChar === '!') AudioEngine.trigger('exclamation');
         else if (lastChar === '?') AudioEngine.trigger('question');
     }
-
     const match = rawWord.match(/^([^\w]*)([\w\-'’]+)([^\w]*)$/);
     let prefix = "", core = rawWord, suffix = "";
     if (match) { prefix = match[1]; core = match[2]; suffix = match[3]; }
-
     const pivotIdx = getPivotIndex(core);
     els.left.textContent = prefix + core.substring(0, pivotIdx);
     els.pivot.textContent = core.charAt(pivotIdx);
@@ -428,4 +552,5 @@ function toggleSound() {
     if (soundEnabled) AudioEngine.init();
 }
 
+// Start App
 init();
