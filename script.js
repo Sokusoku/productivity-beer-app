@@ -1,12 +1,10 @@
 // --- 1. FILE CONFIGURATION ---
-// List of files to scan. In a static environment, we must define these manually.
-// Ensure these files exist in your 'stories/' folder.
 const storyFiles = [
     'stories/the_last_watchmaker.txt'
 ];
 
 // --- STATE ---
-let library = []; // Will hold parsed story objects
+let library = []; 
 let currentStory = null;
 let currentTone = 'happy';
 let currentLength = 'short';
@@ -28,10 +26,18 @@ let tempSettings = { ...appSettings };
 
 // --- ELEMENTS ---
 const els = {
+    // Pages
+    pageIntro: document.getElementById('page-intro'),
     pageHome: document.getElementById('page-home'),
     pageReader: document.getElementById('page-reader'),
     pageSettings: document.getElementById('page-settings'),
     
+    // Intro Elements
+    btnEnterApp: document.getElementById('btnEnterApp'),
+    iLeft: document.getElementById('iLeft'),
+    iPivot: document.getElementById('iPivot'),
+    iRight: document.getElementById('iRight'),
+
     // Home Inputs
     select: document.getElementById('storySelect'),
     toneSelector: document.getElementById('toneSelector'),
@@ -70,6 +76,10 @@ const els = {
 
 // --- INITIALIZATION ---
 async function init() {
+    // 0. Start Intro Demo
+    startIntroLoop();
+    els.btnEnterApp.addEventListener('click', enterApp);
+
     // 1. Load and Parse Library
     await buildLibrary();
 
@@ -82,6 +92,42 @@ async function init() {
         loadSelectedStory(library[0].id);
     }
 }
+
+// --- INTRO PAGE LOGIC ---
+let introInterval = null;
+const introWords = "Keep Your Eyes Fixed On The Red Letter".split(" ");
+let introIndex = 0;
+
+function startIntroLoop() {
+    if (introInterval) clearInterval(introInterval);
+    introIndex = 0;
+    
+    const tick = () => {
+        const word = introWords[introIndex];
+        const match = word.match(/^([^\w]*)([\w\-'’]+)([^\w]*)$/);
+        let prefix = "", core = word, suffix = "";
+        if (match) { prefix = match[1]; core = match[2]; suffix = match[3]; }
+        const pivotIdx = getPivotIndex(core);
+        els.iLeft.textContent = prefix + core.substring(0, pivotIdx);
+        els.iPivot.textContent = core.charAt(pivotIdx);
+        els.iRight.textContent = core.substring(pivotIdx + 1) + suffix;
+        els.iPivot.style.color = 'var(--text-red)'; // Ensure red
+        introIndex = (introIndex + 1) % introWords.length;
+    };
+    tick();
+    introInterval = setInterval(tick, 500); // Slow speed for demo
+}
+
+function stopIntroLoop() {
+    clearInterval(introInterval);
+}
+
+function enterApp() {
+    stopIntroLoop();
+    els.pageIntro.classList.add('hidden');
+    els.pageHome.classList.remove('hidden');
+}
+
 
 // --- LIBRARY LOGIC ---
 
