@@ -9,8 +9,46 @@
 </head>
 <body>
 
-    <!-- === PAGE 1: HOME === -->
-    <div id="page-home">
+    <!-- === PAGE 0: INTRO / PREVIEW === -->
+    <div id="page-intro">
+        <div class="intro-content">
+            <h1>Welcome to Speed<span class="logo-red">R</span>eader</h1>
+            
+            <div class="walkthrough-container">
+                <!-- Live Demo Box -->
+                <div class="demo-stage">
+                    <div class="guide-notch-top" style="height:10px; top:0px;"></div>
+                    <div class="word-display" id="introDisplay">
+                        <span class="segment left" id="iLeft"></span>
+                        <span class="segment pivot" id="iPivot"></span>
+                        <span class="segment right" id="iRight"></span>
+                    </div>
+                    <div class="guide-notch-bottom" style="height:10px; bottom:0px;"></div>
+                    
+                    <!-- Tooltip Explanation -->
+                    <div class="tooltip-wrapper">
+                        <div class="tooltip-arrow">▲</div>
+                        <div class="tooltip-text">
+                            <strong style="color:var(--text-red)">The Focus Point</strong><br>
+                            Keep your eyes locked on the red letter. <br>Let the words come to you.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Walkthrough -->
+                <div class="walkthrough-text">
+                    <h2>Stop Moving Your Eyes</h2>
+                    <p>Traditional reading wastes time scanning left to right. This app uses <strong>RSVP</strong> (Rapid Serial Visual Presentation).</p>
+                    <p>By fixing your gaze on the <strong>Optimal Recognition Point</strong> (the red letter), you can read 2x or 3x faster with better retention.</p>
+                </div>
+            </div>
+
+            <button id="btnEnterApp" class="primary-btn pulse-btn">Get Started</button>
+        </div>
+    </div>
+
+    <!-- === PAGE 1: HOME (Hidden by default) === -->
+    <div id="page-home" class="hidden">
         <div class="scroll-container">
             <div class="home-header">
                 <h1>Speed<span class="logo-red">R</span>eader</h1>
