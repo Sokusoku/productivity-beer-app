@@ -33,9 +33,37 @@ body {
     height: 100%;
     display: flex;
     flex-direction: column;
-    /* Reuse reader background logic or keep generic black */
     background: #000; 
+    position: relative;
 }
+
+.intro-footer-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    z-index: 10;
+}
+
+.skip-btn-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 200;
+}
+
+.btn-skip {
+    background: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    transition: color 0.2s;
+    padding: 5px;
+}
+.btn-skip:hover { color: #fff; }
 
 /* Tooltip Styles */
 .tutorial-tooltip {
@@ -63,14 +91,14 @@ body {
     border: 6px solid transparent;
 }
 
-/* Tooltip Arrow Logic (Top/Bottom) */
-/* If tooltip is above element */
-.tutorial-tooltip[style*="top:"]::after {
+/* Tooltip Arrow: Pointing Down (Tooltip is Above) */
+.tutorial-tooltip[class*="tip-above"]::after {
     top: 100%;
     border-top-color: var(--text-red);
 }
-/* If tooltip is below element */
-.tutorial-tooltip[style*="bottom:"]::after {
+
+/* Tooltip Arrow: Pointing Up (Tooltip is Below) */
+.tutorial-tooltip[class*="tip-below"]::after {
     bottom: 100%;
     border-bottom-color: var(--text-red);
 }
@@ -84,9 +112,23 @@ body {
     animation: pulse 2s infinite;
 }
 
+/* Highlight for the button user needs to click */
+.highlight-target {
+    border-color: var(--text-red) !important;
+    color: #fff !important;
+    box-shadow: 0 0 15px var(--text-red);
+    animation: pulse-red 1.5s infinite;
+}
+
 @keyframes pulse {
     0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
     70% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
     100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
 }
 
@@ -118,16 +160,24 @@ body {
 .home-header h1 { margin: 0; font-weight: normal; letter-spacing: 2px; }
 .logo-red { color: var(--text-red); font-weight: bold; }
 
-.gear-icon {
+.header-actions {
     position: absolute;
     right: 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.gear-icon, .help-icon {
     font-size: 1.5rem;
     background: none;
     border: none;
     color: #666;
     cursor: pointer;
+    padding: 5px;
 }
-.gear-icon:hover { color: #fff; transform: rotate(90deg); transition: transform 0.3s; }
+.gear-icon:hover, .help-icon:hover { color: #fff; }
+.gear-icon:hover { transform: rotate(90deg); transition: transform 0.3s; }
 
 .home-content {
     width: 100%;
@@ -233,6 +283,7 @@ button.primary-btn {
     margin-top: 10px;
 }
 button.primary-btn:active { transform: scale(0.98); }
+button.primary-btn:disabled { background: #333; color: #666; cursor: not-allowed; animation: none; }
 
 /* --- PAGE 2: READER (IMMERSIVE) --- */
 #page-reader {
@@ -288,7 +339,7 @@ button.primary-btn:active { transform: scale(0.98); }
     align-items: center;
     gap: 20px;
     background: linear-gradient(to top, rgba(0,0,0,1) 30%, rgba(0,0,0,0));
-    position: relative; /* Context for tooltips if needed */
+    position: relative;
 }
 
 .progress-text { color: #666; font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 5px; }
@@ -296,6 +347,7 @@ button.primary-btn:active { transform: scale(0.98); }
 .control-panel {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 25px;
     background: rgba(26, 26, 26, 0.8);
     padding: 10px 30px;
@@ -303,6 +355,7 @@ button.primary-btn:active { transform: scale(0.98); }
     border: 1px solid #333;
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     backdrop-filter: blur(5px);
+    position: relative;
 }
 
 .btn-circle {
