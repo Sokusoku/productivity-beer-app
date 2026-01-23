@@ -32,89 +32,56 @@ body {
     width: 100%;
     height: 100%;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    background: radial-gradient(circle at center, #1a1a1a 0%, #000 70%);
-}
-
-.intro-content {
-    max-width: 600px;
-    width: 90%;
-    text-align: center;
-    display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 30px;
+    /* Reuse reader background logic or keep generic black */
+    background: #000; 
 }
 
-.intro-content h1 {
-    font-size: 2rem;
-    letter-spacing: 2px;
-    margin: 0;
-}
-
-.walkthrough-container {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #333;
-    border-radius: 12px;
-    padding: 30px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.demo-stage {
-    position: relative;
-    height: 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-bottom: 1px solid #333;
-    margin-bottom: 20px;
-    background: #000;
-    border-radius: 8px;
-}
-
-.demo-stage .word-display {
-    font-size: 3rem; /* Slightly smaller for intro */
-}
-
-.tooltip-wrapper {
+/* Tooltip Styles */
+.tutorial-tooltip {
     position: absolute;
-    bottom: -55px;
+    background: var(--text-red);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: sans-serif;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.5s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+}
+
+.tutorial-tooltip::after {
+    content: '';
+    position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    animation: bounce 2s infinite;
+    border: 6px solid transparent;
 }
 
-.tooltip-arrow { color: var(--text-red); font-size: 1.2rem; margin-bottom: -5px; }
-
-.tooltip-text {
-    background: #333;
-    color: #eee;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-family: sans-serif;
-    border: 1px solid var(--text-red);
-    white-space: nowrap;
+/* Tooltip Arrow Logic (Top/Bottom) */
+/* If tooltip is above element */
+.tutorial-tooltip[style*="top:"]::after {
+    top: 100%;
+    border-top-color: var(--text-red);
+}
+/* If tooltip is below element */
+.tutorial-tooltip[style*="bottom:"]::after {
+    bottom: 100%;
+    border-bottom-color: var(--text-red);
 }
 
-@keyframes bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-5px); }
+.tutorial-tooltip.active {
+    opacity: 1;
+    transform: translateY(0);
 }
-
-.walkthrough-text { text-align: left; font-family: sans-serif; line-height: 1.5; color: #aaa; }
-.walkthrough-text h2 { color: #fff; font-size: 1.2rem; margin-top: 0; }
-.walkthrough-text p { margin: 10px 0; font-size: 0.95rem; }
 
 .pulse-btn {
     animation: pulse 2s infinite;
-    font-size: 1.3rem !important;
-    padding: 15px 40px !important;
 }
 
 @keyframes pulse {
@@ -122,7 +89,6 @@ body {
     70% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
     100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
 }
-
 
 /* --- SCROLLABLE LAYOUT --- */
 .scroll-container {
@@ -322,6 +288,7 @@ button.primary-btn:active { transform: scale(0.98); }
     align-items: center;
     gap: 20px;
     background: linear-gradient(to top, rgba(0,0,0,1) 30%, rgba(0,0,0,0));
+    position: relative; /* Context for tooltips if needed */
 }
 
 .progress-text { color: #666; font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 5px; }
