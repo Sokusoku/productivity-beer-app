@@ -1,0 +1,32 @@
+METADATA
+Title: Pride and Prejudice
+Author: Jane Austen
+Summary: The classic novel of manners, following Elizabeth Bennet as she deals with issues of manners, upbringing, morality, education, and marriage in the society of the landed gentry of the British Regency.
+END_METADATA
+
+=== VARIANT: happy | LENGTH: short ===
+(Happy Short) "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife." Elizabeth laughed, her eyes meeting Mr. Darcy's across the ballroom. The pride had melted away, leaving only a warm, undeniable affection. He bowed, and in that moment, she knew. Their story wouldn't be one of prejudice, but of a love that conquered every misunderstanding.
+
+=== VARIANT: happy | LENGTH: medium ===
+(Happy Medium) "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife." Elizabeth laughed, the sound bright and clear, her eyes meeting Mr. Darcy's across the crowded ballroom. The stiff pride that had once defined him had melted away, leaving only a warm, undeniable affection in his gaze. He bowed low, a gesture of humble devotion, and in that moment, she knew. The obstacles of class and family had vanished like mist. Their story wouldn't be one of prejudice and harsh words, but of a love that conquered every misunderstanding and bloomed into a perfect, lasting union.
+
+=== VARIANT: happy | LENGTH: long ===
+(Happy Long) "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife." Elizabeth laughed, the sound bright and clear as a bell, her fine eyes meeting Mr. Darcy's across the crowded, candlelit ballroom of Netherfield. The stiff, cold pride that had once defined him and driven them apart had melted away completely, leaving only a warm, undeniable affection and vulnerability in his gaze. He bowed low, a gesture of humble devotion that shocked the onlookers, and in that moment, she knew with absolute certainty. The obstacles of class, family, and Lady Catherine's interference had vanished like morning mist. Their story wouldn't be one of prejudice, harsh words, or missed opportunities, but of a deep, abiding love that conquered every misunderstanding and bloomed into a perfect, lasting union of two equal souls and wits.
+
+=== VARIANT: sad | LENGTH: short ===
+(Sad Short) The letter fell from Elizabeth's trembling hands. Lydia was lost, the family name ruined. Darcy turned away, his face a mask of cold indifference. The gap between them was now an ocean, unbridgeable by apologies or regret. She watched him leave, realizing that her prejudice had cost her the only man who had ever truly understood her. The love story ended before it began.
+
+=== VARIANT: sad | LENGTH: medium ===
+(Sad Medium) The letter fell from Elizabeth's trembling hands, fluttering to the floor like a dying bird. Lydia was lost, run off with Wickham, and the family name was irrevocably ruined. Darcy turned away, his face a mask of cold indifference, the warmth she had started to see completely extinguished. The gap between them was now an ocean, unbridgeable by apologies, money, or regret. She watched him leave the inn, realizing with a breaking heart that her own prejudice and her family's folly had cost her the only man who had ever truly understood her. The love story ended in silence before it ever truly began.
+
+=== VARIANT: sad | LENGTH: long ===
+(Sad Long) The letter fell from Elizabeth's trembling hands, fluttering to the dusty floor of the inn like a dying bird. Lydia was lost, run off with the scoundrel Wickham, and the Bennet family name was irrevocably ruined in the eyes of society. Darcy turned away, his face a mask of cold, aristocratic indifference, the warmth she had started to see completely extinguished by the scandal. The gap between them was now an ocean, unbridgeable by apologies, money, or the deepest regret. She watched him leave the room without a backward glance, realizing with a breaking heart that her own stubborn prejudice and her family's unchecked folly had cost her the only man who had ever truly understood and challenged her. The love story she had just begun to hope for ended in silence and shame before it ever truly began, leaving her to a future of loneliness.
+
+=== VARIANT: spicier | LENGTH: short ===
+(Spicier Short) The rain soaked them both, plastering their clothes to their skin. Darcy didn't just propose; he demanded. "I love you," he breathed, stepping closer, invading her space. "Most ardently." His hand brushed her cheek, his thumb tracing her lip. The argument that followed wasn't about social standing; it was a clash of fiery tempers and suppressed desire that threatened to consume them both right there in the storm.
+
+=== VARIANT: spicier | LENGTH: medium ===
+(Spicier Medium) The rain soaked them both, plastering their clothes to their skin, revealing the tension in every muscle. Darcy didn't just propose; he demanded, his usual reserve shattered. "I love you," he breathed, stepping closer, invading her space until she was backed against the stone folly. "Most ardently." His hand brushed her cheek, his thumb tracing her bottom lip with shocking intimacy. The argument that followed wasn't about social standing or family; it was a clash of fiery tempers and suppressed desire that threatened to consume them both right there in the storm. She hated him, she wanted him, and the line between the two was vanishing.
+
+=== VARIANT: spicier | LENGTH: long ===
+(Spicier Long) The rain soaked them both, plastering their period clothing to their skin, revealing the tension in every muscle and the heave of their chests. Darcy didn't just propose; he demanded, his usual stoic reserve shattered by months of longing. "I love you," he breathed, stepping closer, invading her space until she was backed against the cold stone of the folly. "Most ardently." His hand brushed her wet cheek, his thumb tracing her bottom lip with a shocking, heated intimacy. The argument that followed wasn't about social standing, money, or family connections; it was a clash of fiery tempers and a violently suppressed desire that threatened to consume them both right there in the raging storm. She told herself she hated him, but her body betrayed her; she wanted him, and the line between hatred and passion was vanishing in the rain.
