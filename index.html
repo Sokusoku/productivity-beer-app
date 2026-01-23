@@ -9,41 +9,52 @@
 </head>
 <body>
 
-    <!-- === PAGE 0: INTRO / PREVIEW === -->
+    <!-- === PAGE 0: INTRO / PREVIEW (Tutorial Mode) === -->
     <div id="page-intro">
-        <div class="intro-content">
-            <h1>Welcome to Speed<span class="logo-red">R</span>eader</h1>
+        <!-- Replicating Reader Layout for Intro -->
+        
+        <div class="reader-top-bar">
+            <!-- Tooltip 3 -->
+            <div id="tip-sound" class="tutorial-tooltip" style="right: 50px; top: 60px;">
+                Audio cues enabled
+            </div>
             
-            <div class="walkthrough-container">
-                <!-- Live Demo Box -->
-                <div class="demo-stage">
-                    <div class="guide-notch-top" style="height:10px; top:0px;"></div>
-                    <div class="word-display" id="introDisplay">
-                        <span class="segment left" id="iLeft"></span>
-                        <span class="segment pivot" id="iPivot"></span>
-                        <span class="segment right" id="iRight"></span>
-                    </div>
-                    <div class="guide-notch-bottom" style="height:10px; bottom:0px;"></div>
-                    
-                    <!-- Tooltip Explanation -->
-                    <div class="tooltip-wrapper">
-                        <div class="tooltip-arrow">▲</div>
-                        <div class="tooltip-text">
-                            <strong style="color:var(--text-red)">The Focus Point</strong><br>
-                            Keep your eyes locked on the red letter. <br>Let the words come to you.
-                        </div>
-                    </div>
-                </div>
+            <button class="btn-icon" style="opacity: 0.5; cursor: default;">✕</button>
+            <button class="btn-icon">🔊</button>
+        </div>
 
-                <!-- Text Walkthrough -->
-                <div class="walkthrough-text">
-                    <h2>Stop Moving Your Eyes</h2>
-                    <p>Traditional reading wastes time scanning left to right. This app uses <strong>RSVP</strong> (Rapid Serial Visual Presentation).</p>
-                    <p>By fixing your gaze on the <strong>Optimal Recognition Point</strong> (the red letter), you can read 2x or 3x faster with better retention.</p>
-                </div>
+        <div class="reader-main">
+            <!-- Tooltip 1 -->
+            <div id="tip-focus" class="tutorial-tooltip" style="top: 20%; transform: translateY(-100%);">
+                Focus on the Red Letter (ORP)
             </div>
 
-            <button id="btnEnterApp" class="primary-btn pulse-btn">Get Started</button>
+            <div class="guide-notch-top"></div>
+            <div class="word-display" id="introDisplay">
+                <span class="segment left" id="iLeft">Welcome</span>
+                <span class="segment pivot" id="iPivot"></span>
+                <span class="segment right" id="iRight"></span>
+            </div>
+            <div class="guide-notch-bottom"></div>
+        </div>
+
+        <div class="reader-footer">
+            <div class="progress-text">Tutorial Mode</div>
+            
+            <!-- Tooltip 2 -->
+            <div id="tip-controls" class="tutorial-tooltip" style="top: -10px;">
+                Controls mimic a music player
+            </div>
+
+            <div class="control-panel">
+                <button class="btn-circle">−</button>
+                <button class="btn-circle">⏮</button>
+                <button class="btn-circle play">▶</button>
+                <button class="btn-circle">+</button>
+            </div>
+            <div class="speed-text">300 WPM</div>
+            
+            <button id="btnEnterApp" class="primary-btn pulse-btn" style="margin-top: 20px; z-index: 10;">Start Reading Now</button>
         </div>
     </div>
 
