@@ -12,13 +12,16 @@
     --reader-size: 4rem; 
 }
 
+* { box-sizing: border-box; }
+
 body {
     background-color: var(--bg-color);
     color: var(--text-silver);
     font-family: var(--reader-font);
     margin: 0;
     overflow: hidden;
-    height: 100vh;
+    height: 100vh; /* Fallback */
+    height: 100dvh; /* Dynamic viewport height for mobile */
     width: 100vw;
 }
 
@@ -35,6 +38,7 @@ body {
     flex-direction: column;
     background: #000; 
     position: relative;
+    overflow: hidden; /* Prevent scrolling on page-intro */
 }
 
 .intro-footer-actions {
@@ -42,15 +46,14 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 15px;
-    margin-top: 20px;
+    margin-top: 10px;
     z-index: 10;
+    width: 100%;
 }
 
 .skip-btn-container {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 200;
+    /* Removed absolute positioning */
+    display: none; /* Hide container if still present in HTML logic, rely on footer actions */
 }
 
 .btn-skip {
@@ -61,7 +64,7 @@ body {
     font-size: 0.9rem;
     text-decoration: underline;
     transition: color 0.2s;
-    padding: 5px;
+    padding: 10px;
 }
 .btn-skip:hover { color: #fff; }
 
@@ -453,10 +456,8 @@ input[type=range] { width: 100%; cursor: pointer; accent-color: var(--text-red);
 
 /* --- MOBILE ADJUSTMENTS --- */
 @media (max-width: 600px) {
-    .skip-btn-container {
-        right: auto;
-        left: 20px;
-    }
+    /* Only specific overrides if needed, generic responsive already handles skip button */
+    
 }
 
 @media (max-height: 800px) {
@@ -470,18 +471,18 @@ input[type=range] { width: 100%; cursor: pointer; accent-color: var(--text-red);
 
     .reader-footer {
         padding: 10px 15px 15px 15px;
-        gap: 8px;
+        gap: 5px; /* Tighter gap */
     }
 
     .intro-footer-actions {
-        margin-top: 8px;
+        margin-top: 5px;
         gap: 5px;
     }
 
     button.primary-btn {
         padding: 10px 20px;
         font-size: 1rem;
-        margin-top: 5px;
+        margin-top: 2px;
     }
 
     .control-panel {
