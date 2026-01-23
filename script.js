@@ -36,7 +36,7 @@ END_METADATA
     }
 ];
 
-// --- STATE ---
+// --- 2. STATE ---
 let library = []; 
 let currentStory = null;
 let currentTone = 'happy';
@@ -49,7 +49,6 @@ let wpm = 300;
 let timer = null;
 let soundEnabled = true;
 
-// Default Settings
 let appSettings = {
     fontFamily: "'Courier New', Courier, monospace",
     fontSize: "4",
@@ -57,7 +56,7 @@ let appSettings = {
 };
 let tempSettings = { ...appSettings };
 
-// --- ELEMENTS ---
+// --- 3. ELEMENTS ---
 const els = {
     // Pages
     pageIntro: document.getElementById('page-intro'),
@@ -124,43 +123,118 @@ const els = {
     previewDisplay: document.getElementById('previewDisplay')
 };
 
-// --- INITIALIZATION ---
-async function init() {
-    // 0. Start Intro Sequence
-    startIntroLoop();
-    initTutorial();
-    
-    // Intro Listeners
-    els.btnEnterApp.addEventListener('click', enterApp);
-    els.btnSkipTutorial.addEventListener('click', skipTutorial);
-    els.btnGoToTutorial.addEventListener('click', restartTutorial);
-    
-    // Tutorial Interactions
-    els.iBtnPlay.addEventListener('click', () => handleIntroInteraction('play'));
-    els.iBtnFaster.addEventListener('click', () => handleIntroInteraction('faster'));
-    els.iBtnSlower.addEventListener('click', () => handleIntroInteraction('slower'));
-    els.iBtnReset.addEventListener('click', () => handleIntroInteraction('reset'));
+// --- 4. CORE HELPERS (AUDIO & RENDERING) ---
 
-    // 1. Load and Parse Library
-    await buildLibrary();
-
-    // 2. Setup Event Listeners
-    setupEventListeners();
-
-    // 3. Select first story if available
-    if (library.length > 0) {
-        els.select.value = library[0].id;
-        loadSelectedStory(library[0].id);
+// Audio Engine
+const AudioEngine = (() => {
+    let ctx = null;
+    function initCtx() {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
     }
+    function playWave(type, freq, duration, slide) {
+        if (!ctx) initCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        if (type === 'slide') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(400, ctx.currentTime);
+            osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + duration);
+        } else {
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        }
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+    }
+    function playNoise(duration) {
+        if (!ctx) initCtx();
+        const bSize = ctx.sampleRate * duration;
+        const buf = ctx.createBuffer(1, bSize, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for(let i=0; i<bSize; i++) data[i] = Math.random()*2-1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buf;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+duration);
+        noise.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start();
+    }
+    return {
+        trigger: (puncType) => {
+            const soundType = appSettings.sounds[puncType]; 
+            if (soundType === 'noise') {
+                playNoise(0.2);
+            } else {
+                let freq = 440;
+                if (puncType === 'period') freq = 100;
+                if (puncType === 'question') freq = 800;
+                if (puncType === 'exclamation') freq = 200;
+                playWave(soundType, freq, 0.2, soundType === 'slide');
+            }
+        },
+        init: initCtx
+    };
+})();
+
+// Calculate ORP (Optimal Recognition Point)
+function getPivotIndex(word) {
+    const len = word.length;
+    if (len === 1) return 0;
+    if (len >= 2 && len <= 5) return 1;
+    if (len >= 6 && len <= 9) return 2;
+    if (len >= 10 && len <= 13) return 3;
+    return 4;
 }
 
-// --- INTRO PAGE LOGIC ---
+// Unified Trigger Logic
+function triggerAudio(rawWord) {
+    if (!soundEnabled) return;
+    const lastChar = rawWord.slice(-1);
+    if (lastChar === ',') AudioEngine.trigger('comma');
+    else if (lastChar === '.') AudioEngine.trigger('period');
+    else if (lastChar === '!') AudioEngine.trigger('exclamation');
+    else if (lastChar === '?') AudioEngine.trigger('question');
+}
+
+// Unified Display Logic
+// Takes a raw word string and an object containing {left, pivot, right} DOM elements
+function displayWord(rawWord, domElements) {
+    // 1. Audio
+    triggerAudio(rawWord);
+
+    // 2. Parsing
+    const match = rawWord.match(/^([^\w]*)([\w\-'’]+)([^\w]*)$/);
+    let prefix = "", core = rawWord, suffix = "";
+    if (match) { 
+        prefix = match[1]; 
+        core = match[2]; 
+        suffix = match[3]; 
+    }
+
+    // 3. ORP Calculation
+    const pivotIdx = getPivotIndex(core);
+
+    // 4. Update DOM
+    domElements.left.textContent = prefix + core.substring(0, pivotIdx);
+    domElements.pivot.textContent = core.charAt(pivotIdx);
+    domElements.right.textContent = core.substring(pivotIdx + 1) + suffix;
+}
+
+
+// --- 5. INTRO PAGE LOGIC ---
 let introInterval = null;
 let introSpeed = 200;
 let isIntroPlaying = true;
 let tutorialStep = 0;
 
-const introWords = "Welcome to Speed Reader Pro. This technique is called RSVP. Keep your eyes fixed on the red letter. Do not move your eyes left or right. Just relax and let the words flow. You can read much faster this way. Try focusing now.".split(" ");
+const introWords = "Welcome to Speed Reader Pro! This technique is called RSVP. Keep your eyes fixed on the red letter, do not move your eyes left or right. Ready? Just relax, and let the words flow. Can you hear the sounds? You can read much faster this way!".split(" ");
 let introIndex = 0;
 
 function startIntroLoop() {
@@ -168,19 +242,18 @@ function startIntroLoop() {
     isIntroPlaying = true;
     const interval = 60000 / introSpeed;
     
+    // Intro uses specific ID elements passed to unified display function
+    const introDom = { left: els.iLeft, pivot: els.iPivot, right: els.iRight };
+
     const tick = () => {
-        const word = introWords[introIndex];
-        const match = word.match(/^([^\w]*)([\w\-'’]+)([^\w]*)$/);
-        let prefix = "", core = word, suffix = "";
-        if (match) { prefix = match[1]; core = match[2]; suffix = match[3]; }
-        const pivotIdx = getPivotIndex(core);
-        els.iLeft.textContent = prefix + core.substring(0, pivotIdx);
-        els.iPivot.textContent = core.charAt(pivotIdx);
-        els.iRight.textContent = core.substring(pivotIdx + 1) + suffix;
-        els.iPivot.style.color = 'var(--text-red)';
+        // Only trigger audio if actively playing (not paused by user)
+        if (!isIntroPlaying) return; 
+        
+        displayWord(introWords[introIndex], introDom);
         introIndex = (introIndex + 1) % introWords.length;
     };
-    tick();
+    
+    tick(); // First immediate call
     introInterval = setInterval(tick, interval);
     els.iBtnPlay.textContent = "⏸";
 }
@@ -202,67 +275,44 @@ function updateIntroSpeed(newSpeed) {
     if (isIntroPlaying) startIntroLoop();
 }
 
-// --- INTERACTIVE TUTORIAL SEQUENCE ---
-
 function initTutorial() {
-    // Reset state
     tutorialStep = 0;
     introIndex = 0;
     updateIntroSpeed(200);
+    // Clear all tooltips & highlights
     document.querySelectorAll('.tutorial-tooltip').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.highlight-target').forEach(t => t.classList.remove('highlight-target'));
     els.btnEnterApp.disabled = true;
     els.btnEnterApp.classList.remove('pulse-btn');
 
-    // Step 1: Focus (Passive wait)
+    // Step 1: Focus
     els.tipFocus.classList.add('active');
     setTimeout(() => {
         els.tipFocus.classList.remove('active');
-        advanceTutorial(1); // Go to Play
+        advanceTutorial(1);
     }, 4000);
 }
 
 function advanceTutorial(step) {
     tutorialStep = step;
-    // Clear current highlights
     document.querySelectorAll('.highlight-target').forEach(t => t.classList.remove('highlight-target'));
     document.querySelectorAll('.tutorial-tooltip').forEach(t => t.classList.remove('active'));
 
-    if (step === 1) {
-        els.tipPlay.classList.add('active');
-        els.iBtnPlay.classList.add('highlight-target');
-    } else if (step === 2) {
-        els.tipFaster.classList.add('active');
-        els.iBtnFaster.classList.add('highlight-target');
-    } else if (step === 3) {
-        els.tipSlower.classList.add('active');
-        els.iBtnSlower.classList.add('highlight-target');
-    } else if (step === 4) {
-        els.tipReset.classList.add('active');
-        els.iBtnReset.classList.add('highlight-target');
-    } else if (step === 5) {
-        // Finish
-        els.btnEnterApp.disabled = false;
-        els.btnEnterApp.classList.add('pulse-btn');
-    }
+    if (step === 1) { els.tipPlay.classList.add('active'); els.iBtnPlay.classList.add('highlight-target'); }
+    else if (step === 2) { els.tipFaster.classList.add('active'); els.iBtnFaster.classList.add('highlight-target'); }
+    else if (step === 3) { els.tipSlower.classList.add('active'); els.iBtnSlower.classList.add('highlight-target'); }
+    else if (step === 4) { els.tipReset.classList.add('active'); els.iBtnReset.classList.add('highlight-target'); }
+    else if (step === 5) { els.btnEnterApp.disabled = false; els.btnEnterApp.classList.add('pulse-btn'); }
 }
 
 function handleIntroInteraction(action) {
-    if (tutorialStep === 1 && action === 'play') {
-        toggleIntroPlay();
-        advanceTutorial(2);
-    } else if (tutorialStep === 2 && action === 'faster') {
-        updateIntroSpeed(300);
-        advanceTutorial(3);
-    } else if (tutorialStep === 3 && action === 'slower') {
-        updateIntroSpeed(200);
-        advanceTutorial(4);
-    } else if (tutorialStep === 4 && action === 'reset') {
-        introIndex = 0;
-        if(!isIntroPlaying) startIntroLoop(); 
-        advanceTutorial(5);
-    } else {
-        // Allow interaction even if not the current step
+    // Only allow specific actions at specific steps, or general interaction if tutorial done/flexible
+    if (tutorialStep === 1 && action === 'play') { toggleIntroPlay(); advanceTutorial(2); }
+    else if (tutorialStep === 2 && action === 'faster') { updateIntroSpeed(300); advanceTutorial(3); }
+    else if (tutorialStep === 3 && action === 'slower') { updateIntroSpeed(200); advanceTutorial(4); }
+    else if (tutorialStep === 4 && action === 'reset') { introIndex = 0; if(!isIntroPlaying) startIntroLoop(); advanceTutorial(5); }
+    else {
+        // Standard functionality outside of strict tutorial steps
         if(action === 'play') toggleIntroPlay();
         if(action === 'faster') updateIntroSpeed(introSpeed + 25);
         if(action === 'slower') updateIntroSpeed(introSpeed - 25);
@@ -291,29 +341,19 @@ function restartTutorial() {
 }
 
 
-// --- LIBRARY LOGIC ---
+// --- 6. LIBRARY & PARSING ---
 
 async function buildLibrary() {
     els.select.innerHTML = '<option disabled>Scanning stories...</option>';
-    
-    // Parse embedded stories directly
     const parsedStories = embeddedStories.map(s => parseStoryFile(s.content, s.id));
-
-    // Sort Alphabetically
     parsedStories.sort((a, b) => a.title.localeCompare(b.title));
-    
     library = parsedStories;
     populateSelectDropdown();
 }
 
 function parseStoryFile(text, filename) {
     const lines = text.split('\n');
-    let story = {
-        id: filename, 
-        title: "Unknown Title",
-        variants: {} 
-    };
-
+    let story = { id: filename, title: "Unknown Title", variants: {} };
     let readingMetadata = false;
     let currentVariant = null;
     let currentLength = null;
@@ -321,51 +361,34 @@ function parseStoryFile(text, filename) {
 
     for (let line of lines) {
         const trimmed = line.trim();
-
-        if (trimmed === 'METADATA') {
-            readingMetadata = true;
-            continue;
-        }
-        if (trimmed === 'END_METADATA') {
-            readingMetadata = false;
-            continue;
-        }
-
+        if (trimmed === 'METADATA') { readingMetadata = true; continue; }
+        if (trimmed === 'END_METADATA') { readingMetadata = false; continue; }
         if (readingMetadata) {
             if (trimmed.startsWith('Title:')) story.title = trimmed.replace('Title:', '').trim();
             continue;
         }
-
         if (trimmed.startsWith('===') && trimmed.endsWith('===')) {
             if (currentVariant && currentLength && buffer.length > 0) {
                 if (!story.variants[currentVariant]) story.variants[currentVariant] = {};
                 story.variants[currentVariant][currentLength] = buffer.join('\n').trim();
             }
-
             const content = trimmed.replace(/===/g, '').trim();
             const parts = content.split('|');
-            currentVariant = null;
-            currentLength = null;
-
+            currentVariant = null; currentLength = null;
             parts.forEach(part => {
                 const [key, val] = part.split(':').map(s => s.trim().toLowerCase());
                 if (key === 'variant') currentVariant = val;
                 if (key === 'length') currentLength = val;
             });
-
-            buffer = []; 
+            buffer = [];
         } else {
-            if (currentVariant && currentLength) {
-                buffer.push(line);
-            }
+            if (currentVariant && currentLength) buffer.push(line);
         }
     }
-
     if (currentVariant && currentLength && buffer.length > 0) {
         if (!story.variants[currentVariant]) story.variants[currentVariant] = {};
         story.variants[currentVariant][currentLength] = buffer.join('\n').trim();
     }
-
     return story;
 }
 
@@ -375,16 +398,14 @@ function populateSelectDropdown() {
         els.select.innerHTML = '<option disabled>No stories found</option>';
         return;
     }
-
     library.forEach(s => {
         const opt = document.createElement('option');
-        opt.value = s.id;
-        opt.textContent = s.title;
+        opt.value = s.id; opt.textContent = s.title;
         els.select.appendChild(opt);
     });
 }
 
-// --- UI UPDATE LOGIC ---
+// --- 7. HOME & UI LOGIC ---
 
 function loadSelectedStory(id) {
     currentStory = library.find(s => s.id === id);
@@ -395,44 +416,42 @@ function loadSelectedStory(id) {
 
 function updateAvailabilityUI() {
     if (!currentStory) return;
+    
+    // Helper to update state classes
+    const updateClasses = (btns, activeVal) => {
+        btns.forEach(b => {
+            if (b.dataset.val === activeVal) b.classList.add('selected');
+            else b.classList.remove('selected');
+        });
+    };
 
     els.toneBtns.forEach(btn => {
         const val = btn.dataset.val;
         const exists = currentStory.variants.hasOwnProperty(val);
         btn.disabled = !exists;
         btn.style.opacity = exists ? '1' : '0.3';
-        
         if (currentTone === val && !exists) {
             const firstValid = Object.keys(currentStory.variants)[0];
             if (firstValid) {
                 currentTone = firstValid;
-                updateSelectionClasses(els.toneBtns, currentTone);
+                updateClasses(els.toneBtns, currentTone);
             }
         }
     });
 
     const availableLengths = currentStory.variants[currentTone] || {};
-    
     els.lengthBtns.forEach(btn => {
         const val = btn.dataset.val;
         const exists = availableLengths.hasOwnProperty(val);
         btn.disabled = !exists;
         btn.style.opacity = exists ? '1' : '0.3';
-
         if (currentLength === val && !exists) {
             const firstValid = Object.keys(availableLengths)[0];
             if (firstValid) {
                 currentLength = firstValid;
-                updateSelectionClasses(els.lengthBtns, currentLength);
+                updateClasses(els.lengthBtns, currentLength);
             }
         }
-    });
-}
-
-function updateSelectionClasses(nodeList, activeVal) {
-    nodeList.forEach(btn => {
-        if (btn.dataset.val === activeVal) btn.classList.add('selected');
-        else btn.classList.remove('selected');
     });
 }
 
@@ -444,60 +463,14 @@ function refreshContent() {
         wordQueue = [];
         return;
     }
-
     const text = currentStory.variants[currentTone][currentLength];
-    
     wordQueue = text.split(/\s+/).filter(w => w.length > 0);
-    
     els.wordCount.textContent = `Words: ${wordQueue.length}`;
     els.staticSummary.textContent = `Summary: A ${currentTone} version of "${currentStory.title}" (${currentLength} length). Ready to read!`;
     els.btnStart.disabled = false;
 }
 
-// --- EVENT HANDLERS ---
-
-function setupEventListeners() {
-    els.select.addEventListener('change', (e) => loadSelectedStory(e.target.value));
-
-    els.toneBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (btn.disabled) return;
-            currentTone = btn.dataset.val;
-            updateSelectionClasses(els.toneBtns, currentTone);
-            updateAvailabilityUI();
-            refreshContent();
-        });
-    });
-
-    els.lengthBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (btn.disabled) return;
-            currentLength = btn.dataset.val;
-            updateSelectionClasses(els.lengthBtns, currentLength);
-            refreshContent();
-        });
-    });
-
-    els.btnStart.addEventListener('click', openReader);
-    els.btnClose.addEventListener('click', closeReader);
-    els.btnOpenSettings.addEventListener('click', openSettings);
-    els.btnCloseSettingsX.addEventListener('click', closeSettingsNoSave);
-    els.btnSaveSettings.addEventListener('click', saveSettings);
-    els.btnResetSettings.addEventListener('click', resetSettings);
-    els.btnPlay.addEventListener('click', togglePlay);
-    els.btnReset.addEventListener('click', resetReader);
-    els.btnSound.addEventListener('click', toggleSound);
-    els.btnFaster.addEventListener('click', () => changeSpeed(25));
-    els.btnSlower.addEventListener('click', () => changeSpeed(-25));
-    els.setFontFamily.addEventListener('change', updatePreviewState);
-    els.setFontSize.addEventListener('input', (e) => {
-        els.fontSizeDisplay.textContent = e.target.value + "rem";
-        updatePreviewState();
-    });
-    els.soundSelects.forEach(s => s.addEventListener('change', updateSoundState));
-}
-
-// --- READER & AUDIO LOGIC ---
+// --- 8. MAIN READER LOGIC ---
 
 function openReader() {
     if (wordQueue.length === 0) return;
@@ -513,6 +486,133 @@ function closeReader() {
     els.pageHome.classList.remove('hidden');
 }
 
+function updateDisplay() {
+    els.progress.textContent = `${currentIndex} / ${wordQueue.length}`;
+    if (currentIndex < wordQueue.length) {
+        // Main reader uses the unified display function
+        const mainDom = { left: els.left, pivot: els.pivot, right: els.right };
+        displayWord(wordQueue[currentIndex], mainDom);
+    } else {
+        stop();
+        els.left.textContent = "";
+        els.pivot.textContent = "DONE";
+        els.right.textContent = "";
+    }
+}
+
+function togglePlay() { isPlaying ? stop() : start(); }
+
+function start() {
+    if (currentIndex >= wordQueue.length) currentIndex = 0;
+    isPlaying = true;
+    els.btnPlay.textContent = "⏸";
+    if (soundEnabled) AudioEngine.init();
+    runTimer();
+}
+
+function runTimer() {
+    const msPerWord = 60000 / wpm;
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+        if (!isPlaying) return;
+        currentIndex++;
+        if (currentIndex >= wordQueue.length) { updateDisplay(); stop(); }
+        else { updateDisplay(); runTimer(); }
+    }, msPerWord);
+}
+
+function stop() { 
+    isPlaying = false; 
+    els.btnPlay.textContent = "▶"; 
+    if(timer) clearTimeout(timer); 
+}
+
+function resetReader() { 
+    stop(); 
+    currentIndex = 0; 
+    updateDisplay(); 
+}
+
+function changeSpeed(delta) {
+    wpm += delta; if(wpm < 50) wpm=50; if(wpm>2000) wpm=2000;
+    els.wpmDisplay.textContent = `${wpm} WPM`;
+    if(isPlaying) { clearTimeout(timer); runTimer(); }
+}
+
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    els.btnSound.textContent = soundEnabled ? '🔊' : '🔇';
+    if (soundEnabled) AudioEngine.init();
+}
+
+// --- 9. INITIALIZATION & LISTENERS ---
+
+async function init() {
+    // Start Intro
+    startIntroLoop();
+    initTutorial();
+    
+    // Intro
+    els.btnEnterApp.addEventListener('click', enterApp);
+    els.btnSkipTutorial.addEventListener('click', skipTutorial);
+    els.btnGoToTutorial.addEventListener('click', restartTutorial);
+    
+    // Intro Controls
+    els.iBtnPlay.addEventListener('click', () => handleIntroInteraction('play'));
+    els.iBtnFaster.addEventListener('click', () => handleIntroInteraction('faster'));
+    els.iBtnSlower.addEventListener('click', () => handleIntroInteraction('slower'));
+    els.iBtnReset.addEventListener('click', () => handleIntroInteraction('reset'));
+
+    // Library & Home
+    await buildLibrary();
+    if (library.length > 0) {
+        els.select.value = library[0].id;
+        loadSelectedStory(library[0].id);
+    }
+    
+    els.select.addEventListener('change', (e) => loadSelectedStory(e.target.value));
+    
+    els.toneBtns.forEach(btn => btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        currentTone = btn.dataset.val;
+        // Manual class update handled in updateAvailabilityUI logic usually, but here for click feedback
+        updateAvailabilityUI(); 
+        refreshContent();
+    }));
+
+    els.lengthBtns.forEach(btn => btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        currentLength = btn.dataset.val;
+        updateAvailabilityUI();
+        refreshContent();
+    }));
+
+    els.btnStart.addEventListener('click', openReader);
+    els.btnClose.addEventListener('click', closeReader);
+    els.btnOpenSettings.addEventListener('click', openSettings);
+    
+    // Settings
+    els.btnCloseSettingsX.addEventListener('click', closeSettingsNoSave);
+    els.btnSaveSettings.addEventListener('click', saveSettings);
+    els.btnResetSettings.addEventListener('click', resetSettings);
+    
+    // Live Preview
+    els.setFontFamily.addEventListener('change', updatePreviewState);
+    els.setFontSize.addEventListener('input', (e) => {
+        els.fontSizeDisplay.textContent = e.target.value + "rem";
+        updatePreviewState();
+    });
+    els.soundSelects.forEach(s => s.addEventListener('change', updateSoundState));
+
+    // Main Reader Controls
+    els.btnPlay.addEventListener('click', togglePlay);
+    els.btnReset.addEventListener('click', resetReader);
+    els.btnSound.addEventListener('click', toggleSound);
+    els.btnFaster.addEventListener('click', () => changeSpeed(25));
+    els.btnSlower.addEventListener('click', () => changeSpeed(-25));
+}
+
+// Settings Logic (needed to be moved out of init if not hoisted, but functions are hoisted)
 function openSettings() {
     tempSettings = JSON.parse(JSON.stringify(appSettings));
     els.setFontFamily.value = tempSettings.fontFamily;
@@ -572,157 +672,5 @@ function updateSoundState(e) {
     tempSettings.sounds[punc] = e.target.value;
 }
 
-let previewInterval = null;
-const previewWords = "A quick fox jumped over".split(" ");
-let previewIndex = 0;
-
-function startPreviewLoop() {
-    if (previewInterval) clearInterval(previewInterval);
-    els.previewDisplay.style.fontFamily = tempSettings.fontFamily;
-    els.previewDisplay.style.fontSize = tempSettings.fontSize + "rem";
-    previewIndex = 0;
-    const tick = () => {
-        const word = previewWords[previewIndex];
-        const match = word.match(/^([^\w]*)([\w\-'’]+)([^\w]*)$/);
-        let prefix = "", core = word, suffix = "";
-        if (match) { prefix = match[1]; core = match[2]; suffix = match[3]; }
-        const pivotIdx = getPivotIndex(core);
-        els.pLeft.textContent = prefix + core.substring(0, pivotIdx);
-        els.pPivot.textContent = core.charAt(pivotIdx);
-        els.pRight.textContent = core.substring(pivotIdx + 1) + suffix;
-        previewIndex = (previewIndex + 1) % previewWords.length;
-    };
-    tick(); 
-    previewInterval = setInterval(tick, 400); 
-}
-
-function stopPreviewLoop() { clearInterval(previewInterval); }
-
-const AudioEngine = (() => {
-    let ctx = null;
-    function initCtx() {
-        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-        if (ctx.state === 'suspended') ctx.resume();
-    }
-    function playWave(type, freq, duration, slide) {
-        if (!ctx) initCtx();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        if (type === 'slide') {
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(400, ctx.currentTime);
-            osc.frequency.linearRampToValueAtTime(800, ctx.currentTime + duration);
-        } else {
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        }
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + duration);
-    }
-    function playNoise(duration) {
-        if (!ctx) initCtx();
-        const bSize = ctx.sampleRate * duration;
-        const buf = ctx.createBuffer(1, bSize, ctx.sampleRate);
-        const data = buf.getChannelData(0);
-        for(let i=0; i<bSize; i++) data[i] = Math.random()*2-1;
-        const noise = ctx.createBufferSource();
-        noise.buffer = buf;
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+duration);
-        noise.connect(gain);
-        gain.connect(ctx.destination);
-        noise.start();
-    }
-    return {
-        trigger: (puncType) => {
-            const soundType = appSettings.sounds[puncType]; 
-            if (soundType === 'noise') {
-                playNoise(0.2);
-            } else {
-                let freq = 440;
-                if (puncType === 'period') freq = 100;
-                if (puncType === 'question') freq = 800;
-                if (puncType === 'exclamation') freq = 200;
-                playWave(soundType, freq, 0.2, soundType === 'slide');
-            }
-        },
-        init: initCtx
-    };
-})();
-
-function getPivotIndex(cleanWord) {
-    const len = cleanWord.length;
-    if (len === 1) return 0;
-    if (len >= 2 && len <= 5) return 1;
-    if (len >= 6 && len <= 9) return 2;
-    if (len >= 10 && len <= 13) return 3;
-    return 4;
-}
-
-function renderWord(rawWord) {
-    if (soundEnabled && isPlaying) {
-        const lastChar = rawWord.slice(-1);
-        if (lastChar === ',') AudioEngine.trigger('comma');
-        else if (lastChar === '.') AudioEngine.trigger('period');
-        else if (lastChar === '!') AudioEngine.trigger('exclamation');
-        else if (lastChar === '?') AudioEngine.trigger('question');
-    }
-    const match = rawWord.match(/^([^\w]*)([\w\-'’]+)([^\w]*)$/);
-    let prefix = "", core = rawWord, suffix = "";
-    if (match) { prefix = match[1]; core = match[2]; suffix = match[3]; }
-    const pivotIdx = getPivotIndex(core);
-    els.left.textContent = prefix + core.substring(0, pivotIdx);
-    els.pivot.textContent = core.charAt(pivotIdx);
-    els.right.textContent = core.substring(pivotIdx + 1) + suffix;
-}
-
-function updateDisplay() {
-    els.progress.textContent = `${currentIndex} / ${wordQueue.length}`;
-    if (currentIndex < wordQueue.length) {
-        renderWord(wordQueue[currentIndex]);
-    } else {
-        stop();
-        els.left.textContent = "";
-        els.pivot.textContent = "DONE";
-        els.right.textContent = "";
-    }
-}
-
-function togglePlay() { isPlaying ? stop() : start(); }
-function start() {
-    if (currentIndex >= wordQueue.length) currentIndex = 0;
-    isPlaying = true;
-    els.btnPlay.textContent = "⏸";
-    if (soundEnabled) AudioEngine.init();
-    runTimer();
-}
-function runTimer() {
-    const msPerWord = 60000 / wpm;
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => {
-        if (!isPlaying) return;
-        currentIndex++;
-        if (currentIndex >= wordQueue.length) { updateDisplay(); stop(); }
-        else { updateDisplay(); runTimer(); }
-    }, msPerWord);
-}
-function stop() { isPlaying = false; els.btnPlay.textContent = "▶"; if(timer) clearTimeout(timer); }
-function resetReader() { stop(); currentIndex = 0; updateDisplay(); }
-function changeSpeed(delta) {
-        wpm += delta; if(wpm < 50) wpm=50; if(wpm>2000) wpm=2000;
-        els.wpmDisplay.textContent = `${wpm} WPM`;
-        if(isPlaying) { clearTimeout(timer); runTimer(); }
-}
-function toggleSound() {
-    soundEnabled = !soundEnabled;
-    els.btnSound.textContent = soundEnabled ? '🔊' : '🔇';
-    if (soundEnabled) AudioEngine.init();
-}
-
-// Start App
+// Start
 init();
