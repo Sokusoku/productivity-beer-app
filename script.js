@@ -37,6 +37,11 @@ const els = {
     iLeft: document.getElementById('iLeft'),
     iPivot: document.getElementById('iPivot'),
     iRight: document.getElementById('iRight'),
+    
+    // Tooltips
+    tipFocus: document.getElementById('tip-focus'),
+    tipControls: document.getElementById('tip-controls'),
+    tipSound: document.getElementById('tip-sound'),
 
     // Home Inputs
     select: document.getElementById('storySelect'),
@@ -76,8 +81,9 @@ const els = {
 
 // --- INITIALIZATION ---
 async function init() {
-    // 0. Start Intro Demo
+    // 0. Start Intro Sequence
     startIntroLoop();
+    runTutorialSequence();
     els.btnEnterApp.addEventListener('click', enterApp);
 
     // 1. Load and Parse Library
@@ -95,7 +101,8 @@ async function init() {
 
 // --- INTRO PAGE LOGIC ---
 let introInterval = null;
-const introWords = "Keep Your Eyes Fixed On The Red Letter".split(" ");
+// Hardcoded text for tutorial
+const introWords = "Welcome to Speed Reader Pro. This technique is called RSVP. Keep your eyes fixed on the red letter. Do not move your eyes left or right. Just relax and let the words flow. You can read much faster this way. Try focusing now.".split(" ");
 let introIndex = 0;
 
 function startIntroLoop() {
@@ -115,11 +122,36 @@ function startIntroLoop() {
         introIndex = (introIndex + 1) % introWords.length;
     };
     tick();
-    introInterval = setInterval(tick, 500); // Slow speed for demo
+    introInterval = setInterval(tick, 300); // 200 WPM
 }
 
 function stopIntroLoop() {
     clearInterval(introInterval);
+}
+
+// Helper to wait
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function runTutorialSequence() {
+    // Initial delay
+    await wait(1000);
+    
+    // 1. Show Focus Tooltip
+    els.tipFocus.classList.add('active');
+    await wait(4000);
+    els.tipFocus.classList.remove('active');
+    
+    // 2. Show Controls Tooltip
+    await wait(500);
+    els.tipControls.classList.add('active');
+    await wait(4000);
+    els.tipControls.classList.remove('active');
+    
+    // 3. Show Sound Tooltip
+    await wait(500);
+    els.tipSound.classList.add('active');
+    await wait(4000);
+    els.tipSound.classList.remove('active');
 }
 
 function enterApp() {
