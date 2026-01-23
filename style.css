@@ -106,6 +106,12 @@ body {
     border-bottom-color: var(--text-red);
 }
 
+/* Specific Tooltip Positioning */
+#tip-sound {
+    right: 15px;
+    top: 70px;
+}
+
 .tutorial-tooltip.active {
     opacity: 1;
     transform: translateY(0);
@@ -495,5 +501,10 @@ input[type=range] { width: 100%; cursor: pointer; accent-color: var(--text-red);
         width: 45px;
         height: 45px;
         font-size: 1.2rem;
+    }
+
+    #tip-sound {
+        top: 55px;
+        right: 15px;
     }
 }
