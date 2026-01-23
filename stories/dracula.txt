@@ -1,0 +1,32 @@
+METADATA
+Title: Dracula
+Author: Bram Stoker
+Summary: The archetypal vampire novel, telling the story of Count Dracula's attempt to move from Transylvania to England so that he may find new blood and spread the undead curse, and of the battle between Dracula and a small group of men and a woman led by Professor Abraham Van Helsing.
+END_METADATA
+
+=== VARIANT: happy | LENGTH: short ===
+(Happy Short) The sun rose over the castle, burning away the mist. Mina smiled, the marks on her neck fading. Dracula was gone, turned to dust by the light of their courage. Jonathan held her hand, safe at last. The nightmare was over, and the world seemed brighter, cleansed of the ancient evil. They rode back to England, not as victims, but as heroes who had saved the soul of the world.
+
+=== VARIANT: happy | LENGTH: medium ===
+(Happy Medium) The sun rose majestically over the Carpathian mountains, burning away the mist and the shadows of the castle. Mina smiled, the terrible marks on her neck fading into nothingness as the curse lifted. Dracula was gone, turned to dust by the light of their courage and the sharpness of their steel. Jonathan held her hand, safe at last, the color returning to his cheeks. The nightmare was over, and the world seemed brighter, cleansed of the ancient evil that had plagued it for centuries. They rode back to England, not as victims of a monster, but as heroes who had saved the soul of the world and each other.
+
+=== VARIANT: happy | LENGTH: long ===
+(Happy Long) The sun rose majestically over the jagged peaks of the Carpathian mountains, burning away the mist and the lingering shadows of Castle Dracula. Mina smiled for the first time in months, the terrible, scarlet marks on her neck fading into nothingness as the curse finally lifted from her soul. Dracula was gone, turned to ancient dust by the light of their combined courage and the sharpness of Quincey's steel. Jonathan held her hand, safe at last, the color returning to his cheeks, the haunted look leaving his eyes. The nightmare was truly over, and the world seemed brighter, cleansed of the ancient, parasitic evil that had plagued it for centuries. They rode back to England, not as victims of a monster, but as a family of heroes who had looked into the abyss and saved the soul of the world and each other from eternal darkness.
+
+=== VARIANT: sad | LENGTH: short ===
+(Sad Short) The wind howled through the broken window. Lucy was gone, calm in death, but the cost was too high. Arthur wept openly. We had stopped the monster, but we could not stop the loss. The victory felt hollow, ash in our mouths. Dracula was dead, but he had taken the best of us with him, leaving us to wander in a world that would always be a little darker.
+
+=== VARIANT: sad | LENGTH: medium ===
+(Sad Medium) The wind howled through the broken window of the tomb. Lucy was gone, lying calm and beautiful in death, but the cost was far too high. Arthur wept openly, broken by the duty he had to perform to save her soul. We had stopped the monster, driving the stake home, but we could not stop the loss that ate at our hearts. The victory felt hollow, like ash in our mouths. Dracula was dead, yes, but he had taken the best and brightest of us with him, leaving us to wander in a world that would always be a little darker and colder without her light.
+
+=== VARIANT: sad | LENGTH: long ===
+(Sad Long) The wind howled through the broken window of the silent tomb, a mournful dirge for the innocent. Lucy was gone, lying calm and beautiful in true death, but the cost of her peace was far too high for those left behind. Arthur wept openly, his spirit broken by the terrible duty he had to perform to save her soul from the curse. We had stopped the monster, Van Helsing driving the stake home with grim determination, but we could not stop the crushing weight of loss that ate at our hearts. The victory felt hollow, like ash and bitter dust in our mouths. Dracula was dead, yes, but he had taken the best and brightest of us with him into the dark, leaving us to wander in a world that would always be a little darker, a little colder, and forever empty without her radiant light.
+
+=== VARIANT: spicier | LENGTH: short ===
+(Spicier Short) The Count's eyes burned with a hypnotic, red fire. He didn't just want blood; he wanted a bride. He moved with a predatory grace, pinning Mina to the bed. "Flesh of my flesh," he whispered, his voice a velvet caress. The fear in the room spiked into something else—a dark, forbidden thrall. It was a seduction of the soul, terrifying and intoxicating in equal measure.
+
+=== VARIANT: spicier | LENGTH: medium ===
+(Spicier Medium) The Count's eyes burned with a hypnotic, red fire that paralyzed the will. He didn't just want blood; he wanted a bride for eternity. He moved with a predatory grace, pinning Mina to the bed, his shadow engulfing her. "Flesh of my flesh, blood of my blood," he whispered, his voice a velvet caress against her throat. The fear in the room spiked into something else—a dark, forbidden thrall that made her heart race. It was a seduction of the soul, a violation that was terrifying and intoxicating in equal measure, promising pleasures that only the undead could know.
+
+=== VARIANT: spicier | LENGTH: long ===
+(Spicier Long) The Count's eyes burned with a hypnotic, red fire that paralyzed the will and silenced all protest. He didn't just want blood to survive; he wanted a bride for eternity to share his dark kingdom. He moved with a predatory grace, pinning Mina to the bed, his massive shadow engulfing her trembling form. "Flesh of my flesh, blood of my blood," he whispered, his voice a velvet caress against her throat, sharp teeth grazing the skin. The fear in the room spiked into something else—a dark, forbidden thrall that made her heart race and her breath hitch. It was a seduction of the soul, a violation that was terrifying and intoxicating in equal measure, promising eternal youth and pleasures that only the undead could know, beckoning her to leave the light forever.

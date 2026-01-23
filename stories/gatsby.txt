@@ -1,0 +1,14 @@
+METADATA
+Title: The Great Gatsby
+Author: F. Scott Fitzgerald
+Summary: A tragic love story set in the roaring twenties, centering on the mysterious millionaire Jay Gatsby and his obsession with the beautiful debutante Daisy Buchanan.
+END_METADATA
+
+=== VARIANT: happy | LENGTH: short ===
+(Happy Short) The lights grew brighter as the earth lurched away from the sun, and now the orchestra is playing yellow cocktail music, and the opera of voices pitches a key higher. Laughter is easier minute by minute, spilled with prodigality, tipped out at a cheerful word. The groups change more swiftly, swelling with new arrivals, dissolving and forming in the same breath; already there are wanderers, confident girls who weave here and there among the stouter and more stable, become for a sharp, joyous moment the center of a group, and then, excited with triumph, glide on through the sea-change of faces and voices and color under the constantly changing light.
+
+=== VARIANT: happy | LENGTH: medium ===
+(Happy Medium) The lights grew brighter as the earth lurched away from the sun, and now the orchestra is playing yellow cocktail music, and the opera of voices pitches a key higher. Laughter is easier minute by minute, spilled with prodigality, tipped out at a cheerful word. The groups change more swiftly, swelling with new arrivals, dissolving and forming in the same breath; already there are wanderers, confident girls who weave here and there among the stouter and more stable, become for a sharp, joyous moment the center of a group, and then, excited with triumph, glide on through the sea-change of faces and voices and color under the constantly changing light. Suddenly one of these gypsies, in trembling opal, seizes a cocktail out of the air, dumps it down for courage and, moving her hands like Frisco, dances out alone on the canvas platform. A momentary hush; the orchestra leader varies his rhythm obligingly for her, and there is a burst of chatter as the erroneous news goes around that she is Gilda Gray’s understudy from the Follies. The party has begun.
+
+=== VARIANT: happy | LENGTH: long ===
+(Happy Long) The lights grew brighter as the earth lurched away from the sun, and now the orchestra is playing yellow cocktail music, and the opera of voices pitches a key higher. Laughter is easier minute by minute, spilled with prodigality, tipped out at a cheerful word. The groups change more swiftly, swelling with new arrivals, dissolving and forming in the same breath; already there are wanderers, confident girls who weave here and there among the stouter and more stable, become for a sharp, joyous moment the center of a group, and then, excited with triumph, glide on through the sea-change of faces and voices and color under the constantly changing light. Suddenly one of these gypsies, in trembling opal, seizes a cocktail out of the air, dumps it down for courage
