@@ -12,13 +12,16 @@
     --reader-size: 4rem; 
 }
 
+* { box-sizing: border-box; }
+
 body {
     background-color: var(--bg-color);
     color: var(--text-silver);
     font-family: var(--reader-font);
     margin: 0;
     overflow: hidden;
-    height: 100vh;
+    height: 100vh; /* Fallback */
+    height: 100dvh; /* Dynamic viewport height for mobile */
     width: 100vw;
 }
 
@@ -26,6 +29,111 @@ body {
 .hidden { display: none !important; }
 .btn-icon { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-silver); padding: 5px; transition: color 0.2s; }
 .btn-icon:hover { color: #fff; }
+
+/* --- PAGE 0: INTRO --- */
+#page-intro {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #000; 
+    position: relative;
+    overflow: hidden; /* Prevent scrolling on page-intro */
+}
+
+.intro-footer-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+    z-index: 10;
+    width: 100%;
+}
+
+.skip-btn-container {
+    /* Removed absolute positioning */
+    display: none; /* Hide container if still present in HTML logic, rely on footer actions */
+}
+
+.btn-skip {
+    background: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    transition: color 0.2s;
+    padding: 10px;
+}
+.btn-skip:hover { color: #fff; }
+
+/* Tooltip Styles */
+.tutorial-tooltip {
+    position: absolute;
+    background: var(--text-red);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: sans-serif;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.5s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+}
+
+.tutorial-tooltip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+}
+
+/* Tooltip Arrow: Pointing Down (Tooltip is Above) */
+.tutorial-tooltip[class*="tip-above"]::after {
+    top: 100%;
+    border-top-color: var(--text-red);
+}
+
+/* Tooltip Arrow: Pointing Up (Tooltip is Below) */
+.tutorial-tooltip[class*="tip-below"]::after {
+    bottom: 100%;
+    border-bottom-color: var(--text-red);
+}
+
+.tutorial-tooltip.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.pulse-btn {
+    animation: pulse 2s infinite;
+}
+
+/* Highlight for the button user needs to click */
+.highlight-target {
+    border-color: var(--text-red) !important;
+    color: #fff !important;
+    box-shadow: 0 0 15px var(--text-red);
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}
 
 /* --- SCROLLABLE LAYOUT --- */
 .scroll-container {
@@ -55,16 +163,24 @@ body {
 .home-header h1 { margin: 0; font-weight: normal; letter-spacing: 2px; }
 .logo-red { color: var(--text-red); font-weight: bold; }
 
-.gear-icon {
+.header-actions {
     position: absolute;
     right: 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.gear-icon, .help-icon {
     font-size: 1.5rem;
     background: none;
     border: none;
     color: #666;
     cursor: pointer;
+    padding: 5px;
 }
-.gear-icon:hover { color: #fff; transform: rotate(90deg); transition: transform 0.3s; }
+.gear-icon:hover, .help-icon:hover { color: #fff; }
+.gear-icon:hover { transform: rotate(90deg); transition: transform 0.3s; }
 
 .home-content {
     width: 100%;
@@ -170,6 +286,7 @@ button.primary-btn {
     margin-top: 10px;
 }
 button.primary-btn:active { transform: scale(0.98); }
+button.primary-btn:disabled { background: #333; color: #666; cursor: not-allowed; animation: none; }
 
 /* --- PAGE 2: READER (IMMERSIVE) --- */
 #page-reader {
@@ -195,6 +312,7 @@ button.primary-btn:active { transform: scale(0.98); }
     align-items: center;
     justify-content: center;
     position: relative;
+    min-height: 0; /* Allows shrinking in flex container */
 }
 
 .word-display {
@@ -225,6 +343,8 @@ button.primary-btn:active { transform: scale(0.98); }
     align-items: center;
     gap: 20px;
     background: linear-gradient(to top, rgba(0,0,0,1) 30%, rgba(0,0,0,0));
+    position: relative;
+    flex-shrink: 0; /* Prevents footer from being crushed */
 }
 
 .progress-text { color: #666; font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 5px; }
@@ -232,6 +352,7 @@ button.primary-btn:active { transform: scale(0.98); }
 .control-panel {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 25px;
     background: rgba(26, 26, 26, 0.8);
     padding: 10px 30px;
@@ -239,6 +360,7 @@ button.primary-btn:active { transform: scale(0.98); }
     border: 1px solid #333;
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     backdrop-filter: blur(5px);
+    position: relative;
 }
 
 .btn-circle {
@@ -331,3 +453,57 @@ button.primary-btn:active { transform: scale(0.98); }
 .btn-save:hover { background: #d00000; }
 
 input[type=range] { width: 100%; cursor: pointer; accent-color: var(--text-red); }
+
+/* --- MOBILE ADJUSTMENTS --- */
+@media (max-width: 600px) {
+    /* Only specific overrides if needed, generic responsive already handles skip button */
+    
+}
+
+@media (max-height: 800px) {
+    :root {
+        --reader-size: 2.5rem; /* Smaller text on mobile */
+    }
+
+    .reader-top-bar {
+        padding: 10px 15px;
+    }
+
+    .reader-footer {
+        padding: 10px 15px 15px 15px;
+        gap: 5px; /* Tighter gap */
+    }
+
+    .intro-footer-actions {
+        margin-top: 5px;
+        gap: 5px;
+    }
+
+    button.primary-btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+        margin-top: 2px;
+    }
+
+    .control-panel {
+        padding: 6px 20px;
+        gap: 15px;
+    }
+
+    .btn-circle {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+
+    .btn-circle.play {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+    }
+
+    #tip-sound {
+        top: 55px;
+        right: 15px;
+    }
+}

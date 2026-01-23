@@ -4,17 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speed Reader Pro</title>
-    <!-- Link to external CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- === PAGE 1: HOME === -->
-    <div id="page-home">
+    <!-- === PAGE 0: INTRO / PREVIEW (Tutorial Mode) === -->
+    <div id="page-intro">
+        
+        <div class="reader-top-bar">
+            <!-- Tooltip: Sound -->
+            <div id="tip-sound" class="tutorial-tooltip tip-below" style="right: 15px; top: 70px;">
+                Audio cues enabled
+            </div>
+            
+            <!-- Removed Redundant X Button here -->
+            <button class="btn-icon" style="margin-left: auto;">🔊</button>
+        </div>
+
+        <div class="reader-main">
+            <!-- Focus Tooltip -->
+            <div id="tip-focus" class="tutorial-tooltip tip-above" style="top: 35%; left: 0; right: 0; margin: auto; width: fit-content;">
+                Focus on the Red Letter
+            </div>
+
+            <div class="guide-notch-top"></div>
+            <div class="word-display" id="introDisplay">
+                <span class="segment left" id="iLeft">Welcome</span>
+                <span class="segment pivot" id="iPivot"></span>
+                <span class="segment right" id="iRight"></span>
+            </div>
+            <div class="guide-notch-bottom"></div>
+        </div>
+
+        <div class="reader-footer">
+            <div class="progress-text">Tutorial Mode</div>
+            
+            <!-- Controls Wrapper for Positioning Tooltips -->
+            <div style="position: relative; margin-bottom: 10px;">
+                <!-- Control Tooltips -->
+                <div id="tip-slower" class="tutorial-tooltip tip-above" style="left: -10px; bottom: 70px;">
+                    Decrease Speed
+                </div>
+                
+                <div id="tip-reset" class="tutorial-tooltip tip-above" style="left: 25%; bottom: 70px;">
+                    Reset Reader
+                </div>
+
+                <div id="tip-play" class="tutorial-tooltip tip-above" style="left: 50%; transform: translateX(-50%); bottom: 80px;">
+                    Click Play/Pause
+                </div>
+
+                <div id="tip-faster" class="tutorial-tooltip tip-above" style="right: -10px; bottom: 70px;">
+                    Increase Speed
+                </div>
+
+                <!-- Actual Controls -->
+                <div class="control-panel">
+                    <button id="iBtnSlower" class="btn-circle">−</button>
+                    <button id="iBtnReset" class="btn-circle">⏮</button>
+                    <button id="iBtnPlay" class="btn-circle play">▶</button>
+                    <button id="iBtnFaster" class="btn-circle">+</button>
+                </div>
+            </div>
+
+            <div id="introWpmDisplay" class="speed-text">200 WPM</div>
+            
+            <div class="intro-footer-actions">
+                <button id="btnEnterApp" class="primary-btn" disabled>Start Reading Now</button>
+                <button id="btnSkipTutorial" class="btn-skip">Skip Tutorial ⟫</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- === PAGE 1: HOME (Hidden by default) === -->
+    <div id="page-home" class="hidden">
         <div class="scroll-container">
             <div class="home-header">
                 <h1>Speed<span class="logo-red">R</span>eader</h1>
-                <button id="btnOpenSettings" class="gear-icon" title="Settings">⚙️</button>
+                <div class="header-actions">
+                    <button id="btnGoToTutorial" class="help-icon" title="Replay Tutorial">❓</button>
+                    <button id="btnOpenSettings" class="gear-icon" title="Settings">⚙️</button>
+                </div>
             </div>
 
             <div class="home-content">
@@ -171,7 +241,6 @@
         </div>
     </div>
 
-    <!-- Link to external JS -->
     <script src="script.js"></script>
 </body>
 </html>
