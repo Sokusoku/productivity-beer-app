@@ -1,13 +1,5 @@
-// --- 1. DATA CONFIGURATION ---
-// IMPORTANT: You must create these files in a "stories" folder.
-// This approach requires a local web server (e.g., Live Server) to avoid CORS errors.
-const storyFiles = [
-    'stories/gatsby.txt',
-    'stories/sherlock.txt',
-    'stories/alice.txt',
-    'stories/pride.txt',
-    'stories/dracula.txt'
-];
+// --- 1. CONFIGURATION ---
+const MANIFEST_URL = 'stories/manifest.json';
 
 // --- STATE ---
 let library = []; 
@@ -133,7 +125,7 @@ let introSpeed = 200;
 let isIntroPlaying = true;
 let tutorialStep = 0;
 
-const introWords = "Welcome to Speed Reader Pro. This technique is called RSVP. Keep your eyes fixed on the red letter. Do not move your eyes left or right. Just relax and let the words flow. You can read much faster this way. Try focusing now.".split(" ");
+const introWords = "Welcome to Speed Reader Pro! This technique is called RSVP. Keep your eyes fixed on the red letter, do not move your eyes left or right. Ready? Just relax, and let the words flow. Can you hear the sounds? You can read much faster this way!".split(" ");
 let introIndex = 0;
 
 function startIntroLoop() {
@@ -252,28 +244,45 @@ function restartTutorial() {
 // --- LIBRARY LOGIC ---
 
 async function buildLibrary() {
-    els.select.innerHTML = '<option disabled>Scanning stories...</option>';
+    els.select.innerHTML = '<option disabled>Scanning library...</option>';
     
-    const parsedStories = [];
+    try {
+        // 1. Fetch Manifest
+        const response = await fetch(MANIFEST_URL);
+        if (!response.ok) throw new Error("Manifest not found");
+        
+        const fileList = await response.json(); // Expects ["file1.txt", "file2.txt"]
+        
+        // 2. Fetch Files listed in Manifest
+        const parsedStories = [];
+        const promises = fileList.map(filename => fetch(`stories/${filename}`).then(res => {
+            if (!res.ok) throw new Error(`Failed to load ${filename}`);
+            return res.text();
+        }).then(text => parseStoryFile(text, filename))
+          .catch(err => console.warn(`Skipping ${filename}:`, err))
+        );
 
-    // Fetch all files in parallel
-    const promises = storyFiles.map(filename => fetch(filename).then(res => {
-        if (!res.ok) throw new Error(`Failed to load ${filename}`);
-        return res.text();
-    }).then(text => parseStoryFile(text, filename))
-      .catch(err => console.error(err))
-    );
+        const results = await Promise.all(promises);
+        
+        results.forEach(story => {
+            if (story) parsedStories.push(story);
+        });
 
-    const results = await Promise.all(promises);
-    
-    results.forEach(story => {
-        if (story) parsedStories.push(story);
-    });
+        parsedStories.sort((a, b) => a.title.localeCompare(b.title));
+        library = parsedStories;
+        
+        if (library.length === 0) {
+            els.select.innerHTML = '<option disabled>No stories found.</option>';
+        } else {
+            populateSelectDropdown();
+        }
 
-    parsedStories.sort((a, b) => a.title.localeCompare(b.title));
-    
-    library = parsedStories;
-    populateSelectDropdown();
+    } catch (err) {
+        console.error("Library Error:", err);
+        els.select.innerHTML = '<option disabled>Error: Start local server</option>';
+        // Fallback or alert user
+        alert("To load stories dynamically, please ensure you are running a local web server and 'stories/manifest.json' exists.");
+    }
 }
 
 function parseStoryFile(text, filename) {
@@ -343,11 +352,6 @@ function parseStoryFile(text, filename) {
 
 function populateSelectDropdown() {
     els.select.innerHTML = '';
-    if (library.length === 0) {
-        els.select.innerHTML = '<option disabled>No stories found</option>';
-        return;
-    }
-
     library.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s.id;
