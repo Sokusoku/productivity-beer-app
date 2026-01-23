@@ -1,6 +1,39 @@
-// --- 1. FILE CONFIGURATION ---
-const storyFiles = [
-    'stories/the_last_watchmaker.txt'
+// --- 1. DATA CONFIGURATION ---
+const embeddedStories = [
+    {
+        id: 'story1',
+        content: `METADATA
+Title: The Last Watchmaker
+Author: Chrono Keeper
+END_METADATA
+
+=== VARIANT: happy | LENGTH: short ===
+(Happy Short) The sun broke through the clouds, casting a golden glow over everything. Laughter echoed through the air, pure and contagious. It was a day for miracles, big and small. Even the impossible seemed within reach. Friends gathered, smiles were shared, and for the first time in a long time, the future looked not just bright, but dazzling.
+
+=== VARIANT: happy | LENGTH: medium ===
+(Happy Medium) The sun broke through the clouds, casting a golden glow over everything. The old watchmaker looked up from his bench, his eyes twinkling like the gears he so lovingly polished. Laughter echoed through the air, pure and contagious, coming from the street festival outside. It was a day for miracles, big and small. Even the impossible seemed within reach; the Great Clock, silent for a century, had begun to tick again. Friends gathered, smiles were shared, and for the first time in a long time, the future looked not just bright, but dazzling. The rhythm of the city synced with the heartbeat of hope.
+
+=== VARIANT: happy | LENGTH: long ===
+(Happy Long) The sun broke through the clouds, casting a golden glow over everything. It wasn't just any sunrise; it was the dawn of the Centennial Celebration. The old watchmaker, Elias, looked up from his mahogany bench, his eyes twinkling like the brass gears he so lovingly polished. Laughter echoed through the air, pure and contagious, drifting up from the cobblestone streets where children chased ribbons of light. It was a day for miracles, big and small. Even the impossible seemed within reach; the Great Clock of Neo-Tokyo, silent for a century due to a lack of 'soul-springs', had begun to tick again on its own accord. Friends gathered in the square, smiles were shared over steaming cups of synthetic cocoa, and for the first time in a long time, the future looked not just bright, but dazzling. The rhythm of the city synced with the heartbeat of hope, pulsing through the neon veins of the architecture, promising an era of peace that Elias had only ever dreamed of in his quiet, ticking solitude.
+
+=== VARIANT: sad | LENGTH: short ===
+(Sad Short) The rain didn't stop. It wasn't a cleansing rain; it was a heavy, gray curtain that drowned out the light. Elias sat alone. The silence in the shop was deafening. The Great Clock remained still, a monument to failures past. There was no laughter today, only the steady, rhythmic dripping of a leak in the roof, counting down the moments of a lonely eternity.
+
+=== VARIANT: sad | LENGTH: medium ===
+(Sad Medium) The rain didn't stop. It wasn't a cleansing rain; it was a heavy, gray curtain that drowned out the light of Neo-Tokyo. Elias sat alone by the window, his tools gathering dust. The silence in the shop was deafening, broken only by his own ragged breathing. The Great Clock remained still, a cold, brass monument to failures past and time lost. There was no laughter today, only the steady, rhythmic dripping of a leak in the roof, counting down the moments of a lonely eternity. He held a gear that would never turn, a piece of a heart that would never beat again.
+
+=== VARIANT: sad | LENGTH: long ===
+(Sad Long) The rain didn't stop. It wasn't a cleansing rain; it was a heavy, gray curtain that drowned out the light of Neo-Tokyo, turning the neon signs into blurry, weeping smears of color. Elias sat alone by the frosted window, his tools gathering dust like memories in a forgotten attic. The silence in the shop was deafening, broken only by his own ragged breathing and the ghosts of ticks that used to fill the air. The Great Clock remained still, a cold, brass monument to failures past and time lost; its hands were frozen at the exact moment she had left. There was no laughter today, no celebration in the streets, only the steady, rhythmic dripping of a leak in the roof, counting down the moments of a lonely eternity. He held a gear that would never turn, a piece of a heart that would never beat again, realizing that some things, once broken, simply cannot be fixed.
+
+=== VARIANT: spicier | LENGTH: short ===
+(Spicier Short) The neon lights flickered with a dangerous energy. Elias didn't just fix clocks; he fixed timelines, and someone was willing to kill for his latest adjustment. The air in the shop was thick with tension and the scent of ozone. She stood in the doorway, a silhouette of danger and desire. "Fix it," she whispered, "or time runs out for both of us."
+
+=== VARIANT: spicier | LENGTH: medium ===
+(Spicier Medium) The neon lights flickered with a dangerous energy, casting long, sharp shadows across the workshop. Elias didn't just fix clocks; he fixed timelines, and someone was willing to kill for his latest adjustment. The air in the shop was thick with tension and the scent of ozone and heated steel. She stood in the doorway, a silhouette of danger and desire, her cybernetic eye glowing a predatory red. "Fix it," she whispered, sliding a laser-pistol onto the counter, "or time runs out for both of us." The thrill of the forbidden tech hummed between them, electric and lethal.
+
+=== VARIANT: spicier | LENGTH: long ===
+(Spicier Long) The neon lights flickered with a dangerous energy, casting long, sharp shadows across the workshop that danced like chrono-thieves. Elias didn't just fix clocks; he fixed timelines, illegally trading seconds on the black market, and someone was willing to kill for his latest adjustment. The air in the shop was thick with tension and the scent of ozone, heated steel, and cheap perfume. She stood in the doorway, a silhouette of danger and desire, her cybernetic eye glowing a predatory red against the gloom. "Fix it," she whispered, sliding a laser-pistol onto the mahogany counter with a heavy thud, "or time runs out for both of us." The thrill of the forbidden tech hummed between them, electric and lethal. He knew he should refuse, but the way she looked at him promised a reward far more valuable than credits—a chance to rewrite the night everything went wrong.`
+    }
 ];
 
 // --- STATE ---
@@ -34,17 +67,29 @@ const els = {
     
     // Intro Elements
     btnEnterApp: document.getElementById('btnEnterApp'),
+    btnSkipTutorial: document.getElementById('btnSkipTutorial'),
     iLeft: document.getElementById('iLeft'),
     iPivot: document.getElementById('iPivot'),
     iRight: document.getElementById('iRight'),
+    introWpm: document.getElementById('introWpmDisplay'),
+    
+    // Intro Control Simulation
+    iBtnPlay: document.getElementById('iBtnPlay'),
+    iBtnFaster: document.getElementById('iBtnFaster'),
+    iBtnSlower: document.getElementById('iBtnSlower'),
+    iBtnReset: document.getElementById('iBtnReset'),
     
     // Tooltips
     tipFocus: document.getElementById('tip-focus'),
-    tipControls: document.getElementById('tip-controls'),
-    tipSound: document.getElementById('tip-sound'),
+    tipPlay: document.getElementById('tip-play'),
+    tipFaster: document.getElementById('tip-faster'),
+    tipSlower: document.getElementById('tip-slower'),
+    tipReset: document.getElementById('tip-reset'),
+    tipWpm: document.getElementById('tip-wpm'),
 
     // Home Inputs
     select: document.getElementById('storySelect'),
+    btnGoToTutorial: document.getElementById('btnGoToTutorial'),
     toneSelector: document.getElementById('toneSelector'),
     lengthSelector: document.getElementById('lengthSelector'),
     toneBtns: document.querySelectorAll('#toneSelector .option-btn'),
@@ -83,8 +128,18 @@ const els = {
 async function init() {
     // 0. Start Intro Sequence
     startIntroLoop();
-    runTutorialSequence();
+    initTutorial();
+    
+    // Intro Listeners
     els.btnEnterApp.addEventListener('click', enterApp);
+    els.btnSkipTutorial.addEventListener('click', skipTutorial);
+    els.btnGoToTutorial.addEventListener('click', restartTutorial);
+    
+    // Tutorial Interactions
+    els.iBtnPlay.addEventListener('click', () => handleIntroInteraction('play'));
+    els.iBtnFaster.addEventListener('click', () => handleIntroInteraction('faster'));
+    els.iBtnSlower.addEventListener('click', () => handleIntroInteraction('slower'));
+    els.iBtnReset.addEventListener('click', () => handleIntroInteraction('reset'));
 
     // 1. Load and Parse Library
     await buildLibrary();
@@ -101,13 +156,17 @@ async function init() {
 
 // --- INTRO PAGE LOGIC ---
 let introInterval = null;
-// Hardcoded text for tutorial
+let introSpeed = 200;
+let isIntroPlaying = true;
+let tutorialStep = 0;
+
 const introWords = "Welcome to Speed Reader Pro. This technique is called RSVP. Keep your eyes fixed on the red letter. Do not move your eyes left or right. Just relax and let the words flow. You can read much faster this way. Try focusing now.".split(" ");
 let introIndex = 0;
 
 function startIntroLoop() {
     if (introInterval) clearInterval(introInterval);
-    introIndex = 0;
+    isIntroPlaying = true;
+    const interval = 60000 / introSpeed;
     
     const tick = () => {
         const word = introWords[introIndex];
@@ -118,40 +177,104 @@ function startIntroLoop() {
         els.iLeft.textContent = prefix + core.substring(0, pivotIdx);
         els.iPivot.textContent = core.charAt(pivotIdx);
         els.iRight.textContent = core.substring(pivotIdx + 1) + suffix;
-        els.iPivot.style.color = 'var(--text-red)'; // Ensure red
+        els.iPivot.style.color = 'var(--text-red)';
         introIndex = (introIndex + 1) % introWords.length;
     };
     tick();
-    introInterval = setInterval(tick, 300); // 200 WPM
+    introInterval = setInterval(tick, interval);
+    els.iBtnPlay.textContent = "⏸";
 }
 
 function stopIntroLoop() {
     clearInterval(introInterval);
+    isIntroPlaying = false;
+    els.iBtnPlay.textContent = "▶";
 }
 
-// Helper to wait
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+function toggleIntroPlay() {
+    if (isIntroPlaying) stopIntroLoop();
+    else startIntroLoop();
+}
 
-async function runTutorialSequence() {
-    // Initial delay
-    await wait(1000);
-    
-    // 1. Show Focus Tooltip
+function updateIntroSpeed(newSpeed) {
+    introSpeed = newSpeed;
+    els.introWpm.textContent = `${introSpeed} WPM`;
+    if (isIntroPlaying) startIntroLoop();
+}
+
+// --- INTERACTIVE TUTORIAL SEQUENCE ---
+
+function initTutorial() {
+    // Reset state
+    tutorialStep = 0;
+    introIndex = 0;
+    updateIntroSpeed(200);
+    document.querySelectorAll('.tutorial-tooltip').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.highlight-target').forEach(t => t.classList.remove('highlight-target'));
+    els.btnEnterApp.disabled = true;
+    els.btnEnterApp.classList.remove('pulse-btn');
+
+    // Step 1: Focus (Passive wait)
     els.tipFocus.classList.add('active');
-    await wait(4000);
-    els.tipFocus.classList.remove('active');
-    
-    // 2. Show Controls Tooltip
-    await wait(500);
-    els.tipControls.classList.add('active');
-    await wait(4000);
-    els.tipControls.classList.remove('active');
-    
-    // 3. Show Sound Tooltip
-    await wait(500);
-    els.tipSound.classList.add('active');
-    await wait(4000);
-    els.tipSound.classList.remove('active');
+    setTimeout(() => {
+        els.tipFocus.classList.remove('active');
+        advanceTutorial(1); // Go to Play
+    }, 4000);
+}
+
+function advanceTutorial(step) {
+    tutorialStep = step;
+    // Clear current highlights
+    document.querySelectorAll('.highlight-target').forEach(t => t.classList.remove('highlight-target'));
+    document.querySelectorAll('.tutorial-tooltip').forEach(t => t.classList.remove('active'));
+
+    if (step === 1) {
+        els.tipPlay.classList.add('active');
+        els.iBtnPlay.classList.add('highlight-target');
+    } else if (step === 2) {
+        els.tipFaster.classList.add('active');
+        els.iBtnFaster.classList.add('highlight-target');
+    } else if (step === 3) {
+        els.tipSlower.classList.add('active');
+        els.iBtnSlower.classList.add('highlight-target');
+    } else if (step === 4) {
+        els.tipReset.classList.add('active');
+        els.iBtnReset.classList.add('highlight-target');
+    } else if (step === 5) {
+        // Finish
+        els.btnEnterApp.disabled = false;
+        els.btnEnterApp.classList.add('pulse-btn');
+    }
+}
+
+function handleIntroInteraction(action) {
+    if (tutorialStep === 1 && action === 'play') {
+        toggleIntroPlay();
+        advanceTutorial(2);
+    } else if (tutorialStep === 2 && action === 'faster') {
+        updateIntroSpeed(300);
+        advanceTutorial(3);
+    } else if (tutorialStep === 3 && action === 'slower') {
+        updateIntroSpeed(200);
+        advanceTutorial(4);
+    } else if (tutorialStep === 4 && action === 'reset') {
+        introIndex = 0;
+        if(!isIntroPlaying) startIntroLoop(); 
+        advanceTutorial(5);
+    } else {
+        // Allow interaction even if not the current step
+        if(action === 'play') toggleIntroPlay();
+        if(action === 'faster') updateIntroSpeed(introSpeed + 25);
+        if(action === 'slower') updateIntroSpeed(introSpeed - 25);
+        if(action === 'reset') introIndex = 0;
+    }
+}
+
+function skipTutorial() {
+    document.querySelectorAll('.tutorial-tooltip').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.highlight-target').forEach(t => t.classList.remove('highlight-target'));
+    els.btnEnterApp.disabled = false;
+    els.btnEnterApp.classList.add('pulse-btn');
 }
 
 function enterApp() {
@@ -160,28 +283,21 @@ function enterApp() {
     els.pageHome.classList.remove('hidden');
 }
 
+function restartTutorial() {
+    els.pageHome.classList.add('hidden');
+    els.pageIntro.classList.remove('hidden');
+    startIntroLoop();
+    initTutorial();
+}
+
 
 // --- LIBRARY LOGIC ---
 
 async function buildLibrary() {
     els.select.innerHTML = '<option disabled>Scanning stories...</option>';
     
-    const parsedStories = [];
-
-    // Fetch all files in parallel
-    const promises = storyFiles.map(filename => fetch(filename).then(res => {
-        if (!res.ok) throw new Error(`Failed to load ${filename}`);
-        return res.text();
-    }).then(text => parseStoryFile(text, filename))
-      .catch(err => console.error(err))
-    );
-
-    const results = await Promise.all(promises);
-    
-    // Filter valid results
-    results.forEach(story => {
-        if (story) parsedStories.push(story);
-    });
+    // Parse embedded stories directly
+    const parsedStories = embeddedStories.map(s => parseStoryFile(s.content, s.id));
 
     // Sort Alphabetically
     parsedStories.sort((a, b) => a.title.localeCompare(b.title));
@@ -191,12 +307,11 @@ async function buildLibrary() {
 }
 
 function parseStoryFile(text, filename) {
-    // Parsing Logic
     const lines = text.split('\n');
     let story = {
         id: filename, 
         title: "Unknown Title",
-        variants: {} // Structure: { 'happy': { 'short': "text...", 'long': "text..." } }
+        variants: {} 
     };
 
     let readingMetadata = false;
@@ -221,17 +336,13 @@ function parseStoryFile(text, filename) {
             continue;
         }
 
-        // Section Detection: === VARIANT: happy | LENGTH: short ===
         if (trimmed.startsWith('===') && trimmed.endsWith('===')) {
-            // Save previous buffer
             if (currentVariant && currentLength && buffer.length > 0) {
                 if (!story.variants[currentVariant]) story.variants[currentVariant] = {};
                 story.variants[currentVariant][currentLength] = buffer.join('\n').trim();
             }
 
-            // Parse new section header
             const content = trimmed.replace(/===/g, '').trim();
-            // content example: "VARIANT: happy | LENGTH: short"
             const parts = content.split('|');
             currentVariant = null;
             currentLength = null;
@@ -242,7 +353,7 @@ function parseStoryFile(text, filename) {
                 if (key === 'length') currentLength = val;
             });
 
-            buffer = []; // Reset buffer
+            buffer = []; 
         } else {
             if (currentVariant && currentLength) {
                 buffer.push(line);
@@ -250,7 +361,6 @@ function parseStoryFile(text, filename) {
         }
     }
 
-    // Save last buffer
     if (currentVariant && currentLength && buffer.length > 0) {
         if (!story.variants[currentVariant]) story.variants[currentVariant] = {};
         story.variants[currentVariant][currentLength] = buffer.join('\n').trim();
@@ -279,25 +389,19 @@ function populateSelectDropdown() {
 function loadSelectedStory(id) {
     currentStory = library.find(s => s.id === id);
     if (!currentStory) return;
-
-    // 1. Check Availability and Update Buttons
     updateAvailabilityUI();
-
-    // 2. Load Content
     refreshContent();
 }
 
 function updateAvailabilityUI() {
     if (!currentStory) return;
 
-    // Check Tones
     els.toneBtns.forEach(btn => {
         const val = btn.dataset.val;
         const exists = currentStory.variants.hasOwnProperty(val);
         btn.disabled = !exists;
         btn.style.opacity = exists ? '1' : '0.3';
         
-        // If current selection is invalid, switch to first available
         if (currentTone === val && !exists) {
             const firstValid = Object.keys(currentStory.variants)[0];
             if (firstValid) {
@@ -307,7 +411,6 @@ function updateAvailabilityUI() {
         }
     });
 
-    // Check Lengths for the *Current Tone*
     const availableLengths = currentStory.variants[currentTone] || {};
     
     els.lengthBtns.forEach(btn => {
@@ -316,7 +419,6 @@ function updateAvailabilityUI() {
         btn.disabled = !exists;
         btn.style.opacity = exists ? '1' : '0.3';
 
-        // Switch if current length invalid
         if (currentLength === val && !exists) {
             const firstValid = Object.keys(availableLengths)[0];
             if (firstValid) {
@@ -345,10 +447,8 @@ function refreshContent() {
 
     const text = currentStory.variants[currentTone][currentLength];
     
-    // Parse words
     wordQueue = text.split(/\s+/).filter(w => w.length > 0);
     
-    // Update Stats
     els.wordCount.textContent = `Words: ${wordQueue.length}`;
     els.staticSummary.textContent = `Summary: A ${currentTone} version of "${currentStory.title}" (${currentLength} length). Ready to read!`;
     els.btnStart.disabled = false;
@@ -357,23 +457,18 @@ function refreshContent() {
 // --- EVENT HANDLERS ---
 
 function setupEventListeners() {
-    // Story Select
-    els.select.addEventListener('change', (e) => {
-        loadSelectedStory(e.target.value);
-    });
+    els.select.addEventListener('change', (e) => loadSelectedStory(e.target.value));
 
-    // Tone Buttons
     els.toneBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.disabled) return;
             currentTone = btn.dataset.val;
             updateSelectionClasses(els.toneBtns, currentTone);
-            updateAvailabilityUI(); // Re-check lengths for new tone
+            updateAvailabilityUI();
             refreshContent();
         });
     });
 
-    // Length Buttons
     els.lengthBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.disabled) return;
@@ -383,7 +478,6 @@ function setupEventListeners() {
         });
     });
 
-    // Navigation & Settings
     els.btnStart.addEventListener('click', openReader);
     els.btnClose.addEventListener('click', closeReader);
     els.btnOpenSettings.addEventListener('click', openSettings);
